@@ -12,3 +12,31 @@ f. nueva_obra(), que debe incluir las sentencias necesarias para crear nuevas in
 • Este método debe retornar la nueva instancia de obra. 
 g. obtener_indicadores(), que debe incluir las sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM. 
 """
+
+# DUDA, estos métodos son de clase o de instancia?
+from abc import ABC, abstractmethod
+class GestionarObra(ABC):
+
+    @abstractmethod
+    def extraer_datos(self):
+        pass
+
+    @abstractmethod
+    def conectar_db(self):
+        pass
+
+    @abstractmethod
+    def mapear_orm(self):
+        pass
+
+    @abstractmethod
+    def cargar_datos(self):
+        pass
+
+    @abstractmethod
+    def nueva_obra(self):
+        pass
+
+    @abstractmethod
+    def nueva_obra(self):
+        pass

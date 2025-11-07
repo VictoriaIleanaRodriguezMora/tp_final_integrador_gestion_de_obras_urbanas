@@ -40,9 +40,9 @@ Se requiere desarrollar un software en Python para gestionar las obras urbanas d
 
 #### 3. Modelo ORM
 - Crear módulo `modelo_orm.py` que contenga:
-  - Definición de clases y atributos necesarios
-  - Clase `BaseModel` heredando de `peewee.Model`
-  - Persistencia en base de datos SQLite: `obras_urbanas.db`
+  - Definición de clases y atributos necesarios, siguiendo el modelo *ORM de Pewee*, para poder persistir los datos importados del dataset en una base de datos relacional de tipo SQLite `obras_urbanas.db`
+  - Aquí se debe incluir  además la clase `BaseModel` heredando de `peewee.Model`
+
 
 #### 4. Gestión de Obras
 - Crear módulo `gestionar_obras.py` con la clase abstracta `GestionarObra` y los siguientes métodos:
