@@ -57,7 +57,7 @@ Se requiere desarrollar un software en Python para gestionar las obras urbanas d
 | `nueva_obra()` | Crear nuevas instancias de Obra |
 | `obtener_indicadores()` | Obtener información de obras existentes |
 
-#### 5. Clase Obra - Métodos de Instancia
+#### 5. Clase Obra,  es una de las clases que debe formar parte del modelo ORM, debe incluir  los siguientes métodos de instancia con el objetivo de definir las diferentes etapas de avance  de obra: 
 - `nuevo_proyecto()`
 - `iniciar_contratacion()`
 - `adjudicar_obra()`
@@ -70,33 +70,38 @@ Se requiere desarrollar un software en Python para gestionar las obras urbanas d
 
 ---
 
-### Flujo de Trabajo
+### Flujo de Trabajo - Especificaciones para la Gestión de Obras
+#### 6.  Se deberán crear nuevas instancias de Obra (dos instancias como mínimo) 
+- invocando al  método de clase `GestionarObra.nueva_obra()`. 
 
-#### 6-7. Creación y Gestión de Obras
-- Crear **mínimo 2 instancias** de Obra usando `GestionarObra.nueva_obra()`
-- Cada obra debe pasar por todas las etapas definidas
-- Persistir cambios después de cada etapa con `save()`
+7. Cada una de las nuevas obras deben pasar por todas las etapas definidas, salvo `incrementar_plazo()` e `incrementar_mano_obra()` que son opcionales. Para ello se debe invocar a los métodos de instancia de la clase Obra, siguiendo el orden de la declaración de las etapas (desde `nuevo_proyecto()` hasta `finalizar_obra()` ó `rescindir_obra()`). Luego de cada cambio de estado del objeto Obra producto de una nueva etapa de avance de la obra, se deben persistir los nuevos valores usando el método `save()`.
 
-#### 8-16. Secuencia de Etapas
-1. **Proyecto:** `nuevo_proyecto()` - Etapa inicial "Proyecto"
-2. **Contratación:** `iniciar_contratacion()` - Asignar tipo y número de contratación
-3. **Adjudicación:** `adjudicar_obra()` - Asignar empresa y número de expediente
-4. **Inicio:** `iniciar_obra()` - Asignar datos de inicio y financiamiento
-5. **Avance:** `actualizar_porcentaje_avance()` - Actualizar porcentaje
-6. **Opcionales:** `incrementar_plazo()` y `incrementar_mano_obra()`
-7. **Finalización:** `finalizar_obra()` o `rescindir_obra()`
+8. Para iniciar un nuevo proyecto de obra se debe invocar al método `nuevo_proyecto()`. Aquí la etapa inicial de las nuevas instancias de Obra debe tener el valor “Proyecto” (si este valor no existe en la tabla “etapas” de la BD, se deberá crear la instancia y luego insertar el nuevo registro). Los valores de los atributos `tipo_obra`, `area_responsable` y `barrio` deben ser alguno de los existentes en la base de datos.
 
-#### 17. Indicadores Finales
-- Listado de todas las áreas responsables
-- Listado de todos los tipos de obra
-- Cantidad de obras en cada etapa
-- Cantidad de obras y monto total de inversión por tipo de obra
-- Listado de barrios de las comunas 1, 2 y 3
-- Cantidad de obras finalizadas en ≤ 24 meses
-- Monto total de inversión
+9. A continuación, se debe iniciar la licitación/contratación de la obra, para ello se debe invocar al método `iniciar_contratacion()`, asignando el `TipoContratacion` (debe ser un valor existente en la BD) y el `nro_contratacion`.
 
----
+10. Para adjudicar la obra a una empresa, se debe invocar al método `adjudicar_obra()` y asignarle la `Empresa` (debe ser una empresa existente en la BD) y el `nro_expediente`.
 
+11. Para indicar el inicio de la obra, se debe invocar al método `iniciar_obra()`, y asignarle valores a los siguientes atributos: `destacada`, `fecha_inicio`, `fecha_fin_inicial`, `fuente_financiamiento` (debe ser un valor existente en la BD) y `mano_obra`.
+
+12. Para registrar avances de la obra, se debe invocar al método `actualizar_porcentaje_avance()` y actualizar el valor del atributo `porcentaje_avance`.
+
+13. Para incrementar el plazo de la obra, se debe invocar al método `incrementar_plazo()` y actualizar el valor del atributo `plazo_meses`. (Esta acción es opcional, pero el método debe estar definido).
+
+14. Para incrementar la cantidad de mano de obra, se debe invocar al método `incrementar_mano_obra()` y actualizar el valor del atributo `mano_obra`. (Esta acción es opcional, pero el método debe estar definido).
+
+15. Para indicar la finalización de una obra, se debe invocar al método `finalizar_obra()` y actualizar el valor del atributo etapa a “Finalizada” y del atributo `porcentaje_avance` a “100”.
+
+16. Para indicar la rescisión de una obra, se debe invocar al método `rescindir_obra()` y actualizar el valor del atributo etapa a “Rescindida”.
+
+17. Para finalizar la ejecución del programa, se debe invocar al método de clase `GestionarObra.obtener_indicadores()` para obtener y mostrar por consola la siguiente información:  
+    a. Listado de todas las áreas responsables.  
+    b. Listado de todos los tipos de obra.  
+    c. Cantidad de obras que se encuentran en cada etapa.  
+    d. Cantidad de obras y monto total de inversión por tipo de obra.  
+    e. Listado de todos los barrios pertenecientes a las comunas 1, 2 y 3.  
+    f. Cantidad de obras finalizadas en un plazo menor o igual a 24 meses.  
+    g. Monto total de inversión.
 ### Aclaraciones Importantes
 
 1. **Clase GestionarObra:** Todos los métodos deben ser de clase, así como sus atributos.
