@@ -2,7 +2,7 @@
 - https://docs.peewee-orm.com/en/latest/
 
 ### Pandas
-- 
+- https://pandas.pydata.org/docs/reference/general_functions.html
 
 ### SQLite
 - 
