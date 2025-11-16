@@ -22,26 +22,76 @@ crear nuevas instancias de la clase o manipular la clase en sí.
 • Sí pueden modificar los atributos de clase.
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC
+import pandas as pd
+from peewee import *
+from modelo_orm import *
+import sqlite3
 
 
 class GestionarObra(ABC):
 
     # sentencias necesarias para manipular el dataset a través de un objeto Dataframe del módulo “pandas”.
-    def extraer_datos(self):
-        pass
+    @classmethod
+    def extraer_datos(cls):
+        try:
+            df = pd.read_csv(
+                "observatorio-de-obras-urbanas.csv", sep=";", encoding="latin1"
+            )
+        except FileNotFoundError as e:
+            print("No se ha encontrado el archivo csv", e)
+        else:
+            return df
 
     # sentencias necesarias para realizar la conexión a la base de datos “obras_urbanas.db”.
-    def conectar_db(self):
-        pass
+    @classmethod
+    def conectar_db(cls):
+        try:
+            cn = sqlite3.connect("obras_urbanas.db")
+        except FileNotFoundError:
+            print("No se ha podido conectar con la base de datos")
+        else:
+            return cn
 
     # sentencias necesarias para realizar la creación de la estructura de la base de datos (tablas y relaciones) utilizando el método de instancia “create_tables(list)” del módulo “peewee”.
-    def mapear_orm(self):
-        pass
+    @classmethod
+    def mapear_orm(cls):
+        db.create_tables(
+            [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
+        )
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
-    def cargar_datos(self):
-        pass
+    @classmethod
+    def limpiar_datos(cls, df: pd.DataFrame, df_limpio):
+        df_limpio = (
+            df.drop(
+                columns=[
+                    "lat",
+                    "lng",
+                    "imagen_1",
+                    "imagen_2",
+                    "imagen_3",
+                    "imagen_4",
+                    "beneficiarios",
+                    "compromiso",
+                    "ba_elige",
+                    "link_interno",
+                    "pliego_descarga",
+                    "estudio_ambiental_descarga",
+                ]
+            )
+            .drop_duplicates()
+            .assign(nombre=df["monto_contrato"].str.strip())
+            .fillna(
+                {
+                    "expediente-numero": 0,
+                    "mano_obra": 0,
+                    "destacada": "desconocido",
+                    "contratacion_tipo": "no posee",
+                }
+            )
+        )
+        return df_limpio
 
     """sentencias necesarias para crear nuevas instancias de Obra. Se deben considerar los siguientes requisitos:
     • Todos los valores requeridos para la creación de estas nuevas instancias deben ser ingresados por teclado.
@@ -49,6 +99,10 @@ class GestionarObra(ABC):
     • Para persistir en la BD los datos de la nueva instancia de Obra debe usarse el método save() de Model del módulo “peewee”.
     • Este método debe retornar la nueva instancia de obra.
     """
+
+    @classmethod
+    def cargar_datos(cls, limpiar_datos):
+            pass
 
     def nueva_obra(self):
         pass
