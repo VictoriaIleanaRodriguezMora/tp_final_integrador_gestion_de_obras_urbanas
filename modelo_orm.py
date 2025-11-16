@@ -19,14 +19,14 @@ class Etapa(BaseModel):
     etapa = CharField(unique=True)
 
     class Meta:
-        db_table = "Etapa"
+        db_table = "Etapa" 
 
 
 class TipoObra(BaseModel):
     tipo = CharField(unique=True)
 
     class Meta:
-        db_table = "Tipo obra"
+        db_table = "Tipo obra" # Si no defino un nombre, toma por defecto el nombre de la clase
 
 
 class AreaResponsable(BaseModel):
@@ -99,4 +99,5 @@ class Obra(BaseModel):
     pliego_descarga = CharField()
     estudio_ambiental_descarga = CharField()
     """
+
 
