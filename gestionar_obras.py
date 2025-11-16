@@ -14,6 +14,12 @@ g. obtener_indicadores(), que debe incluir las sentencias necesarias para obtene
 """
 
 """
+1. En la clase abstracta “GestionarObra”, todos sus métodos deben ser métodos de clase y sus atributos (en caso que considere que deba existir alguno) también serán atributos de clase.
+2. Incluir código Python para manejar posibles excepciones donde considere conveniente para atrapar aquellas que puedan llegar a generarse.
+"""
+
+
+"""
 Los métodos de clase permiten acceder y modificar atributos de clase,
 crear nuevas instancias de la clase o manipular la clase en sí.
 • Deben contar con el decorador @classmethod.
@@ -27,7 +33,7 @@ import pandas as pd
 from peewee import *
 from modelo_orm import *
 import sqlite3
-
+from modelo_orm import db
 
 class GestionarObra(ABC):
 
@@ -52,28 +58,47 @@ class GestionarObra(ABC):
     @classmethod
     def conectar_db(cls):
         try:
-            cn = sqlite3.connect("obras_urbanas.db")
+            db = sqlite3.connect("obras_urbanas.db")
+            return db
         except FileNotFoundError:
-            print("No se ha podido conectar con la base de datos")
+            print(
+                "No se ha podido conectar con la base de datos"
+            )  # Agregar info del error
         else:
-            return cn
+            return db
+
+    @classmethod
+    def desconectar_db(cls):
+        try:
+            db = sqlite3.close()
+            return db
+
+        except FileNotFoundError:
+            print("No se ha podido cerrar  la base de datos")  # Agregar info del error
+
 
     # sentencias necesarias para realizar la creación de la estructura de la base de datos (tablas y relaciones) utilizando el método de instancia “create_tables(list)” del módulo “peewee”.
     @classmethod
+    # 🟡 Agregar manejo de errores
     def mapear_orm(cls):
-        db.create_tables(
+        print("mapear_orm")
+        GestionarObra.conectar_db()
+        db.create_tables(  # db no existe
             [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
         )
+        GestionarObra.conectar_db()
+
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
     # ? No entiendo lo de: utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
     @classmethod
+    # 🟡 Agregar manejo de errores
     def limpiar_datos(cls):
         print("limpiar_datos")
         df = cls.extraer_datos()
         print("df obtenido: ", df)
         df_limpio = (
-            df.drop( # Quita las columnas especificadas
+            df.drop(  # Quita las columnas especificadas
                 columns=[
                     "lat",
                     "lng",
@@ -81,7 +106,7 @@ class GestionarObra(ABC):
                     "imagen_2",
                     "imagen_3",
                     "imagen_4",
-                    "beneficiarios", # Nose si la sacaria
+                    "beneficiarios",  # Nose si la sacaria
                     "compromiso",
                     "ba_elige",
                     "link_interno",
@@ -89,20 +114,22 @@ class GestionarObra(ABC):
                     "estudio_ambiental_descarga",
                 ]
             )
-            .drop_duplicates() # Quita filas duplicadas
-            .assign(monto_contrato=df["monto_contrato"].str.strip()) # Assign agrega una nueva columna al df
-            .fillna( # Rellena los valores nulos
+            .drop_duplicates()  # Quita filas duplicadas
+            .assign(
+                monto_contrato=df["monto_contrato"].str.strip()
+            )  # Assign agrega una nueva columna al df
+            .fillna(  # Rellena los valores nulos
                 {
                     "expediente-numero": 0,
                     "mano_obra": 0,
                     "destacada": "Desconocido",
-                    "contratacion_tipo": "Desconocida", # No pondría 'no posee', porque un tipo tiene que tener. Es desconocido
+                    "contratacion_tipo": "Desconocida",  # No pondría 'no posee', porque un tipo tiene que tener. Es desconocido
                 }
             )
         )
-        #print("df df_limpio: ", df_limpio)
-        print("df df_limpio: ", df_limpio['monto_contrato'])
-        
+        # print("df df_limpio: ", df_limpio)
+        print("df df_limpio: ", df_limpio["monto_contrato"])
+
         return df_limpio
 
     """sentencias necesarias para crear nuevas instancias de Obra. Se deben considerar los siguientes requisitos:
@@ -113,14 +140,17 @@ class GestionarObra(ABC):
     """
 
     @classmethod
+    # 🟡 Agregar manejo de errores
     def cargar_datos(cls, limpiar_datos):
         pass
 
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
     @classmethod
+    # 🟡 Agregar manejo de errores
     def nueva_obra(self):
         pass
 
 
 # GestionarObra.extraer_datos()
 GestionarObra.limpiar_datos()
+GestionarObra.mapear_orm()

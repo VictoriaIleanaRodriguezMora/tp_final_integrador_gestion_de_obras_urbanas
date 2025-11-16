@@ -6,6 +6,7 @@
 
 from peewee import *
 
+# Creacion de la bdd
 db = SqliteDatabase("obras_urbanas.db")
 
 
@@ -98,3 +99,4 @@ class Obra(BaseModel):
     pliego_descarga = CharField()
     estudio_ambiental_descarga = CharField()
     """
+
