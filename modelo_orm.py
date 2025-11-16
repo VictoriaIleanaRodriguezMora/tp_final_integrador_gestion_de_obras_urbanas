@@ -8,7 +8,6 @@ from peewee import *
 
 db = SqliteDatabase("obras_urbanas.db")
 
-
 class BaseModel(Model):
     class Meta:
         database = db
@@ -36,9 +35,10 @@ class AreaResponsable(BaseModel):
 
 
 class Ubicacion(BaseModel):
-    comuna = IntegerField(unique=True)
+    comuna = IntegerField(unique=True) # Bo sé si la comuna es la mejor opcion para ID
     barrio = CharField()
-    direccion = CharField()
+    nombre_calle = CharField()
+    altura = CharField()
 
     class Meta:
         db_table = "Ubicacion"
@@ -46,8 +46,8 @@ class Ubicacion(BaseModel):
 
 # no estoy seguro si dejar este asi o hacerlo parte de la tabla obra
 class Contratacion(BaseModel):
-    contratacion_tipo = CharField(unique=True)
-    nro_contratacion = CharField()
+    nro_contratacion = CharField(unique=True) # El tipo de contratacion es algo que se repite, no es único. En cambio el nro si es unico.
+    tipo_contratacion = CharField()
     cuit_contratista = CharField()
 
     class Meta:
@@ -55,6 +55,7 @@ class Contratacion(BaseModel):
 
 
 class Obra(BaseModel):
+    expediente_numero = CharField(unique=True)
     entorno = CharField()
     nombre = CharField()
     etapa = ForeignKeyField(Etapa, backref="etapa")
@@ -71,8 +72,7 @@ class Obra(BaseModel):
     contratacion_tipo = ForeignKeyField(Contratacion, backref="contratacion")
     mano_obra = IntegerField()
     destacada = CharField()
-    expediente_numero = CharField()
-    financiamiento = CharField()
+    financiamiento = CharField() # 
 
     class Meta:
         db_table = "Obra"
