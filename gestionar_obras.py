@@ -35,13 +35,18 @@ class GestionarObra(ABC):
     @classmethod
     def extraer_datos(cls):
         try:
+            # print('extraer_datos')
             df = pd.read_csv(
                 "observatorio-de-obras-urbanas.csv", sep=";", encoding="latin1"
             )
+            # print(df)
+            return df
+
         except FileNotFoundError as e:
             print("No se ha encontrado el archivo csv", e)
-        else:
-            return df
+
+    #  else:
+    #      return df
 
     # sentencias necesarias para realizar la conexión a la base de datos “obras_urbanas.db”.
     @classmethod
@@ -61,10 +66,14 @@ class GestionarObra(ABC):
         )
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
+    # ? No entiendo lo de: utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
     @classmethod
-    def limpiar_datos(cls, df: pd.DataFrame, df_limpio):
+    def limpiar_datos(cls):
+        print("limpiar_datos")
+        df = cls.extraer_datos()
+        print("df obtenido: ", df)
         df_limpio = (
-            df.drop(
+            df.drop( # Quita las columnas especificadas
                 columns=[
                     "lat",
                     "lng",
@@ -72,7 +81,7 @@ class GestionarObra(ABC):
                     "imagen_2",
                     "imagen_3",
                     "imagen_4",
-                    "beneficiarios",
+                    "beneficiarios", # Nose si la sacaria
                     "compromiso",
                     "ba_elige",
                     "link_interno",
@@ -80,17 +89,20 @@ class GestionarObra(ABC):
                     "estudio_ambiental_descarga",
                 ]
             )
-            .drop_duplicates()
-            .assign(nombre=df["monto_contrato"].str.strip())
-            .fillna(
+            .drop_duplicates() # Quita filas duplicadas
+            .assign(monto_contrato=df["monto_contrato"].str.strip()) # Assign agrega una nueva columna al df
+            .fillna( # Rellena los valores nulos
                 {
                     "expediente-numero": 0,
                     "mano_obra": 0,
-                    "destacada": "desconocido",
-                    "contratacion_tipo": "no posee",
+                    "destacada": "Desconocido",
+                    "contratacion_tipo": "Desconocida", # No pondría 'no posee', porque un tipo tiene que tener. Es desconocido
                 }
             )
         )
+        #print("df df_limpio: ", df_limpio)
+        print("df df_limpio: ", df_limpio['monto_contrato'])
+        
         return df_limpio
 
     """sentencias necesarias para crear nuevas instancias de Obra. Se deben considerar los siguientes requisitos:
@@ -102,11 +114,13 @@ class GestionarObra(ABC):
 
     @classmethod
     def cargar_datos(cls, limpiar_datos):
-            pass
-
-    def nueva_obra(self):
         pass
 
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
+    @classmethod
     def nueva_obra(self):
         pass
+
+
+# GestionarObra.extraer_datos()
+GestionarObra.limpiar_datos()
