@@ -55,10 +55,8 @@ class Ubicacion(BaseModel):
 
 # no estoy seguro si dejar este asi o hacerlo parte de la tabla obra
 class Contratacion(BaseModel):
-    nro_contratacion = CharField(
-        unique=True
-    )  # El tipo de contratacion es algo que se repite, no es único. En cambio el nro si es unico.
-    tipo_contratacion = CharField()
+    nro_contratacion = CharField()
+    contratacion_tipo = CharField()
     cuit_contratista = CharField()
 
     class Meta:
@@ -120,6 +118,6 @@ except OperationalError as e:
     print("Error al conectarse a la BD ", e)
     sqlite_db.close()
     exit()
-# finally:
-#     sqlite_db.close()
-#     print("🔒 Conexión a la BDD cerrada")
+finally:
+    sqlite_db.close()
+    print("🔒 Conexión a la BDD cerrada")

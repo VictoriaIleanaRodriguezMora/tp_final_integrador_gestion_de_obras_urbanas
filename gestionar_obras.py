@@ -66,8 +66,6 @@ class GestionarObra(ABC):
             print(
                 "No se ha podido conectar con la base de datos"
             )  # Agregar info del error
-        else:
-            return db
 
     @classmethod
     def desconectar_db(cls):
@@ -158,6 +156,7 @@ class GestionarObra(ABC):
     @classmethod
     # 🟡 Agregar manejo de errores // obra.create() -> crear la tabla con el df filtrado.
     def cargar_datos(cls, df_limpio):
+        GestionarObra.conectar_db()
         try:
             print("cargar_datos")
             for index, row in df_limpio.iterrows():
@@ -165,23 +164,23 @@ class GestionarObra(ABC):
                 # print(row['etapa'])
                 # etapa = Etapa.get_or_create(etapa=row["etapa"] or "Desconocida")
                 # tipo = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
-                # area = AreaResponsable.get_or_create(
-                #     area_responsable=row["area_responsable"] or "Desconocida"
-                # )
+                #area = AreaResponsable.get_or_create(
+                #    area_responsable=row["area_responsable"] or "Desconocida"
+                #)
 
-                ubicacion = Ubicacion.get_or_create(
-                    comuna=row["comuna"],
-                    barrio=row["barrio"],
-                    direccion=row["direccion"],
-                    # nombre_calle=row["nombre_calle"],
-                    #altura=row["altura"],
+                # ubicacion = Ubicacion.get_or_create(
+                #     comuna=row["comuna"],
+                #     barrio=row["barrio"],
+                #     direccion=row["direccion"],
+                #     # nombre_calle=row["nombre_calle"],
+                #     #altura=row["altura"],
+                # )
+                print("row['contratacion_tipo']", row["contratacion_tipo"]) #  Licitación Pública
+                contratacion = Contratacion.get_or_create(
+                    contratacion_tipo=row["contratacion_tipo"],
+                    nro_contratacion=row["nro_contratacion"],
+                    cuit_contratista=row["cuit_contratista"],
                 )
-
-                # contratacion = Contratacion.get_or_create(
-                #     contratacion_tipo=row["contratacion_tipo"],
-                #     nro_contratacion=row["nro_contratacion"],
-                #     cuit_contratista=row["cuit_contratista"],
-                # )
 
                 # print("etapa=row['etapa']", row["etapa"]) # Adjudicada
                 # print("nombre=row['tipo']", row["tipo"]) # Arquitectura
