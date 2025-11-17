@@ -9,31 +9,15 @@
 from peewee import *
 import sqlite3
 
-# try:
-#     con = sqlite3.connect("obras_urbanas.db")
-#     result = con.execute("PRAGMA integrity_check;").fetchone()[0]
-#     print("Resultado:", result)
-# except Exception as e:
-#     print("No es una base SQLite válida:", e)
-import os
-
-# Eliminar archivo corrupto si existe
-if os.path.exists("obras_urbanas.db"):
-    os.remove("obras_urbanas.db")
 # Creacion de la bdd
 sqlite_db = SqliteDatabase("obras_urbanas.db")
-#""" 
-try:
-    sqlite_db.connect()
-except OperationalError as e:
-    print('Error al conectarse a la BD ', e)
-    exit()
-#"""
+
 
 # Este es nuetro modelo normalizado. Basado en pewee
 class BaseModel(Model):
     class Meta:
         database = sqlite_db
+
 
 class Etapa(BaseModel):
     etapa = CharField()
@@ -41,17 +25,22 @@ class Etapa(BaseModel):
     class Meta:
         db_table = "Etapa"
 
+
 class TipoObra(BaseModel):
     tipo_obra = CharField()
 
     class Meta:
-        db_table = "TipoObra"  # Si no defino un nombre, toma por defecto el nombre de la clase
+        db_table = (
+            "TipoObra"  # Si no defino un nombre, toma por defecto el nombre de la clase
+        )
+
 
 class AreaResponsable(BaseModel):
     area_responsable = CharField()
 
     class Meta:
         db_table = "AreaResponsable"
+
 
 class Ubicacion(BaseModel):
     comuna = IntegerField()  # No sé si la comuna es la mejor opcion para ID
@@ -61,6 +50,7 @@ class Ubicacion(BaseModel):
 
     class Meta:
         db_table = "Ubicacion"
+
 
 # no estoy seguro si dejar este asi o hacerlo parte de la tabla obra
 class Contratacion(BaseModel):
@@ -72,6 +62,7 @@ class Contratacion(BaseModel):
 
     class Meta:
         db_table = "Contratacion"
+
 
 class Obra(BaseModel):
     expediente_numero = CharField(unique=True)
@@ -86,7 +77,7 @@ class Obra(BaseModel):
     nombre = CharField()
     descripcion = CharField()
     monto_contrato = IntegerField()
-    fecha_inicio = DateField(null=True) # Permite valores nulos
+    fecha_inicio = DateField(null=True)  # Permite valores nulos
     fecha_fin_inicial = DateField(null=True)
     plazo_meses = IntegerField()
     porcentaje_avance = IntegerField()
@@ -116,6 +107,18 @@ class Obra(BaseModel):
     """
 
 
-# 🔽Crea el archivo obras_urbanas.db sin registros
-sqlite_db.create_tables([Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra])
-
+try:
+    sqlite_db.connect()
+    print("🔓 Conexión a la BDD abierta")
+    # 🔽Crea el archivo obras_urbanas.db, sin registros
+    sqlite_db.create_tables(
+        [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
+    )
+    print("✍🏼 Estructura de las tablas creada")
+except OperationalError as e:
+    print("Error al conectarse a la BD ", e)
+    sqlite_db.close()
+    exit()
+finally:
+    sqlite_db.close()
+    print("🔒 Conexión a la BDD cerrada")
