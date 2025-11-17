@@ -63,9 +63,9 @@ class GestionarObra(ABC):
             print("🔓 Conexión a la BDD abierta en conectar_db()")
         except FileNotFoundError as e:
             print("No se ha podido conectar con la base de datos", e)
-        finally:
-            sqlite_db.close("obras_urbanas.db")
-            print("🔒 Conexión a la BDD cerrada en conectar_db()")
+        # finally:
+        #     sqlite_db.close()
+        #     print("🔒 Conexión a la BDD cerrada en conectar_db()")
 
     @classmethod
     def desconectar_db(cls):
