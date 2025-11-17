@@ -175,5 +175,8 @@ pip install peewee
 python -m pip install peewee
 ```
 
-### Import de variables desde un archivo a otro con el FROM
+### Import de variables desde un archivo a otro con el FROM 
 - https://es.stackoverflow.com/questions/164861/import-de-variables-desde-un-archivo-a-otro-con-el-from
+
+### Visualizador de SQLite
+- https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer

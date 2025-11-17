@@ -1,2 +1,0 @@
-# Base de datos relacional SQLite
-# proyecto. Aquí se debe incluir además la clase BaseModel heredando de peewee.Model.

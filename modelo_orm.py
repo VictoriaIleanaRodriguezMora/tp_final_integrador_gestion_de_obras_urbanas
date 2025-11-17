@@ -4,47 +4,63 @@
   - Aquí se debe incluir  además la clase `BaseModel` heredando de `peewee.Model`
 """
 
+# ❗ Todas las clases de este archivo, pueden (o deben) tener métodos dentro.
+
 from peewee import *
+import sqlite3
 
+# try:
+#     con = sqlite3.connect("obras_urbanas.db")
+#     result = con.execute("PRAGMA integrity_check;").fetchone()[0]
+#     print("Resultado:", result)
+# except Exception as e:
+#     print("No es una base SQLite válida:", e)
+import os
+
+# Eliminar archivo corrupto si existe
+if os.path.exists("obras_urbanas.db"):
+    os.remove("obras_urbanas.db")
 # Creacion de la bdd
-db = SqliteDatabase("obras_urbanas.db")
+sqlite_db = SqliteDatabase("obras_urbanas.db")
+#""" 
+try:
+    sqlite_db.connect()
+except OperationalError as e:
+    print('Error al conectarse a la BD ', e)
+    exit()
+#"""
 
-
+# Este es nuetro modelo normalizado. Basado en pewee
 class BaseModel(Model):
     class Meta:
-        database = db
-
+        database = sqlite_db
 
 class Etapa(BaseModel):
-    etapa = CharField(unique=True)
+    etapa = CharField()
 
     class Meta:
-        db_table = "Etapa" 
-
+        db_table = "Etapa"
 
 class TipoObra(BaseModel):
-    tipo = CharField(unique=True)
+    tipo_obra = CharField()
 
     class Meta:
-        db_table = "Tipo obra" # Si no defino un nombre, toma por defecto el nombre de la clase
-
+        db_table = "TipoObra"  # Si no defino un nombre, toma por defecto el nombre de la clase
 
 class AreaResponsable(BaseModel):
-    area_responsable = CharField(unique=True)
+    area_responsable = CharField()
 
     class Meta:
-        db_table = "Area responsable"
-
+        db_table = "AreaResponsable"
 
 class Ubicacion(BaseModel):
-    comuna = IntegerField(unique=True)  # Bo sé si la comuna es la mejor opcion para ID
+    comuna = IntegerField()  # No sé si la comuna es la mejor opcion para ID
     barrio = CharField()
     nombre_calle = CharField()
     altura = CharField()
 
     class Meta:
         db_table = "Ubicacion"
-
 
 # no estoy seguro si dejar este asi o hacerlo parte de la tabla obra
 class Contratacion(BaseModel):
@@ -57,26 +73,25 @@ class Contratacion(BaseModel):
     class Meta:
         db_table = "Contratacion"
 
-
 class Obra(BaseModel):
     expediente_numero = CharField(unique=True)
-    etapa = ForeignKeyField(Etapa, backref="etapa")  # FK
-    ubicacion = ForeignKeyField(Ubicacion, backref="ubicacion")  # FK
-    tipo = ForeignKeyField(TipoObra, backref="tipo")  # FK
-    contratacion_tipo = ForeignKeyField(Contratacion, backref="contratacion")  # FK
-    area_responsable = ForeignKeyField(
+    etapa_fk = ForeignKeyField(Etapa, backref="etapa")  # FK
+    ubicacion_fk = ForeignKeyField(Ubicacion, backref="ubicacion")  # FK
+    tipo_obra_fk = ForeignKeyField(TipoObra, backref="tipo_obra")  # FK
+    contratacion_tipo_fk = ForeignKeyField(Contratacion, backref="contratacion")  # FK
+    area_responsable_fk = ForeignKeyField(
         AreaResponsable, backref="area_responsable"
     )  # FK
     entorno = CharField()
     nombre = CharField()
     descripcion = CharField()
     monto_contrato = IntegerField()
-    fecha_inicio = DateField()
-    fecha_fin_inicial = DateField()
+    fecha_inicio = DateField(null=True) # Permite valores nulos
+    fecha_fin_inicial = DateField(null=True)
     plazo_meses = IntegerField()
     porcentaje_avance = IntegerField()
     licitacion_oferta_empresa = CharField()
-    licitacion_anio = DateField()
+    licitacion_anio = DateField(null=True)
     mano_obra = IntegerField()
     destacada = CharField()
     financiamiento = CharField()  #
@@ -100,4 +115,7 @@ class Obra(BaseModel):
     estudio_ambiental_descarga = CharField()
     """
 
+
+# 🔽Crea el archivo obras_urbanas.db sin registros
+sqlite_db.create_tables([Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra])
 
