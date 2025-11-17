@@ -24,7 +24,7 @@ class BaseModel(Model):
 
 
 class Etapa(BaseModel):
-    etapa = CharField()
+    etapa = CharField(unique=True, null=False)
 
     class Meta:
         db_table = "Etapa"
@@ -85,7 +85,7 @@ class Obra(BaseModel):
     plazo_meses = IntegerField()
     porcentaje_avance = IntegerField()
     licitacion_oferta_empresa = CharField()
-    licitacion_anio = DateField(null=True)
+    licitacion_anio = CharField(null=True)
     mano_obra = IntegerField()
     destacada = CharField()
     financiamiento = CharField()  #
@@ -110,18 +110,3 @@ class Obra(BaseModel):
     """
 
 
-try:
-    sqlite_db.connect()
-    print("🔓 Conexión a la BDD abierta")
-    # 🔽 Crea el archivo obras_urbanas.db, sin registros
-    sqlite_db.create_tables(
-        [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
-    )
-    print("✍🏼 Estructura de las tablas creada")
-except OperationalError as e:
-    print("Error al conectarse a la BD ", e)
-    sqlite_db.close()
-    exit()
-finally:
-    sqlite_db.close()
-    print("🔒 Conexión a la BDD cerrada")

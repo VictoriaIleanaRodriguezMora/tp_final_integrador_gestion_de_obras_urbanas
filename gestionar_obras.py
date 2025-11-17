@@ -60,8 +60,8 @@ class GestionarObra(ABC):
     @classmethod
     def conectar_db(cls):
         try:
-            db = sqlite3.connect("obras_urbanas.db")
-            return db
+            if sqlite_db.is_closed():
+                sqlite_db.connect()
         except FileNotFoundError:
             print(
                 "No se ha podido conectar con la base de datos"
@@ -70,9 +70,8 @@ class GestionarObra(ABC):
     @classmethod
     def desconectar_db(cls):
         try:
-            db = sqlite3.close()
-            return db
-
+            if not sqlite_db.is_closed():
+                sqlite_db.close()
         except FileNotFoundError:
             print("No se ha podido cerrar  la base de datos")  # Agregar info del error
 
@@ -88,13 +87,23 @@ class GestionarObra(ABC):
         GestionarObra.conectar_db()
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
-    # ? No entiendo lo de: utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
     @classmethod
     # 🟡 Agregar manejo de errores
     def limpiar_datos(cls):
         print("limpiar_datos")
         df = cls.extraer_datos()
-        print("df obtenido: ", df)
+        # print("df obtenido: ", df)
+
+        # 🟢 Normalizar nombres de columnas
+        df.columns = (
+            df.columns.str.strip()
+            .str.lower()
+            # .str.title()
+            .str.replace("-", "_")
+            .str.replace(" ", "_")
+        )
+
+        # Se crea el cls.df_limpio, donde ya usa las columnas normalizadas de df.columns
         cls.df_limpio = (
             df.drop(  # Quita las columnas especificadas
                 columns=[
@@ -118,7 +127,7 @@ class GestionarObra(ABC):
             )  # Assign agrega una nueva columna al df
             .fillna(  # Rellena los valores nulos
                 {
-                    "expediente-numero": 0,
+                    "expediente_numero": 0,
                     "destacada": "Desconocido",
                     "contratacion_tipo": "Desconocida",
                     "tipo": "Desconocido",
@@ -136,10 +145,24 @@ class GestionarObra(ABC):
                     "licitacion_anio": 0,
                     "mano_obra": 0,
                     "financiamiento": "Desconocido",
+                    "etapa": "Desconocida",
                 }
             )
         )
-        print("df df_limpio: ", cls.df_limpio)
+
+        # 🟢 Normalizar valores de columna 'etapa'
+        cls.df_limpio["etapa"] = cls.df_limpio["etapa"].str.capitalize().str.strip()
+        cls.df_limpio["etapa"] = cls.df_limpio["etapa"].fillna("Desconocida")
+        cls.df_limpio["etapa"] = cls.df_limpio["etapa"].replace("", "Desconocida")
+        cls.df_limpio["etapa"] = (
+            cls.df_limpio["etapa"].str.strip().replace("", "Desconocida")
+        )
+
+        # cls.df_limpio["etapa"] = (
+        #     cls.df_limpio["etapa"].astype(str).str.strip().replace("", "Desconocida")
+        # )
+        # print("df_limpio['etapa']", cls.df_limpio["etapa"].isnull())
+
         cls.df_limpio.to_csv(
             "datos_limpios.csv", index=False
         )  # Aca creamos csv con datos limpios.
@@ -160,28 +183,34 @@ class GestionarObra(ABC):
         try:
             print("cargar_datos")
             for index, row in df_limpio.iterrows():
-                # print("etapa=row['etapa']", row["etapa"])
-                # print(row['etapa'])
-                # etapa = Etapa.get_or_create(etapa=row["etapa"] or "Desconocida")
-                # tipo = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
-                #area = AreaResponsable.get_or_create(
-                #    area_responsable=row["area_responsable"] or "Desconocida"
-                #)
+                print(row["etapa"])
 
+                # print("etapa=row['etapa']", row["etapa"].unique())
+                # print(row['etapa'])
+                # print(df_limpio["etapa"].unique())
+                # NO ANDA 🔽
+                etapa = (row["etapa"] or "").strip() or "Desconocida"
+                # etapa = Etapa.get_or_create(etapa=(row["etapa"] or "").strip() or "Desconocida")
+                etapa = Etapa.get_or_create(etapa=row["etapa"])
+                # tipo = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
+                # area = AreaResponsable.get_or_create(
+                #    area_responsable=row["area_responsable"] or "Desconocida"
+                # )
+
+                # SÍ ANDA 🔽
                 ubicacion = Ubicacion.get_or_create(
                     comuna=row["comuna"],
                     barrio=row["barrio"],
                     direccion=row["direccion"],
                     # nombre_calle=row["nombre_calle"],
-                    #altura=row["altura"],
+                    # altura=row["altura"],
                 )
 
-                #print("row['contratacion_tipo']", row["contratacion_tipo"]) #  Licitación Pública
-                contratacion = Contratacion.get_or_create(
-                    contratacion_tipo=row["contratacion_tipo"],
-                    nro_contratacion=row["nro_contratacion"],
-                    cuit_contratista=row["cuit_contratista"],
-                )
+                # contratacion = Contratacion.get_or_create(
+                #    contratacion_tipo=row["contratacion_tipo"],
+                #    nro_contratacion=row["nro_contratacion"],
+                #    cuit_contratista=row["cuit_contratista"],
+                # )
 
                 # print("etapa=row['etapa']", row["etapa"]) # Adjudicada
                 # print("nombre=row['tipo']", row["tipo"]) # Arquitectura
