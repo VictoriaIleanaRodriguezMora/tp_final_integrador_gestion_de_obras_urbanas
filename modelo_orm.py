@@ -9,9 +9,13 @@
 from peewee import *
 import sqlite3
 
-# Creacion de la bdd
-sqlite_db = SqliteDatabase("obras_urbanas.db")
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
+# Creacion de la bdd
+sqlite_db = SqliteDatabase(os.getenv("DB_NAME"))
+print(os.getenv("DB_NAME"))
 
 # Este es nuetro modelo normalizado. Basado en pewee
 class BaseModel(Model):

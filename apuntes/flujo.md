@@ -19,5 +19,5 @@ ERRORES
 🟡Error al cargar_datos NOT NULL constraint failed: AreaResponsable.area_responsable
 
 ✅Error al cargar_datos type object 'Ubicacion' has no attribute 'direccion'
-🟡Error al cargar_datos type object 'Contratacion' has no attribute 'contratacion_tipo'
-🟡 Error al cargar_datos UNIQUE constraint failed: Contratacion.nro_contratacion
+✅Error al cargar_datos type object 'Contratacion' has no attribute 'contratacion_tipo'
+✅Error al cargar_datos UNIQUE constraint failed: Contratacion.nro_contratacion

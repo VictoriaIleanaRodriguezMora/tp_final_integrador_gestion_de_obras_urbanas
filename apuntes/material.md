@@ -1,10 +1,17 @@
+### Python
+- https://www.w3sch
+
 ### Pewee
 - https://docs.peewee-orm.com/en/latest/
 - https://foro.recursospython.com/Thread-peewee-IntegrityError-NOT-NULL-constraint-failed-person-name?pid=1391
+- https://www.tutorialspoint.com/peewee/peewee_constraints.htm
+- https://docs.peewee-orm.com/en/latest/peewee/models.html
 
 ### Pandas
 - https://pandas.pydata.org/docs/reference/general_functions.html
 - https://www.w3schools.com/python/pandas/ref_df_iterrows.asp
+- https://www.geeksforgeeks.org/python/python-pandas-series-str-strip-lstrip-and-rstrip/
+- https://www.geeksforgeeks.org/python/capitalize-first-letter-of-a-column-in-pandas-dataframe/
 
 ### SQLite
 - 
@@ -21,7 +28,11 @@
 
 ### Visualizador de SQLite
 - https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer
-  
+
+
+### Variables de entorno
+- https://dev.to/asjordi/como-utilizar-variables-de-entorno-en-python-4pk0
+
 ### Instalaciones
 ## Instalar pip
 
@@ -58,3 +69,7 @@ pip install peewee
 python -m pip install peewee
 ```
 
+## Instalar dotenv
+```bash
+pip install python-dotenv
+```

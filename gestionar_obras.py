@@ -168,14 +168,15 @@ class GestionarObra(ABC):
                 #    area_responsable=row["area_responsable"] or "Desconocida"
                 #)
 
-                # ubicacion = Ubicacion.get_or_create(
-                #     comuna=row["comuna"],
-                #     barrio=row["barrio"],
-                #     direccion=row["direccion"],
-                #     # nombre_calle=row["nombre_calle"],
-                #     #altura=row["altura"],
-                # )
-                print("row['contratacion_tipo']", row["contratacion_tipo"]) #  Licitación Pública
+                ubicacion = Ubicacion.get_or_create(
+                    comuna=row["comuna"],
+                    barrio=row["barrio"],
+                    direccion=row["direccion"],
+                    # nombre_calle=row["nombre_calle"],
+                    #altura=row["altura"],
+                )
+
+                #print("row['contratacion_tipo']", row["contratacion_tipo"]) #  Licitación Pública
                 contratacion = Contratacion.get_or_create(
                     contratacion_tipo=row["contratacion_tipo"],
                     nro_contratacion=row["nro_contratacion"],
