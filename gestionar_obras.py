@@ -37,6 +37,7 @@ from modelo_orm import sqlite_db
 
 
 class GestionarObra(ABC):
+    df_limpio = []
 
     # sentencias necesarias para manipular el dataset a través de un objeto Dataframe del módulo “pandas”.
     @classmethod
@@ -59,22 +60,23 @@ class GestionarObra(ABC):
     @classmethod
     def conectar_db(cls):
         try:
-            sqlite_db.connect()
-            print("🔓 Conexión a la BDD abierta en conectar_db()")
-        except FileNotFoundError as e:
-            print("No se ha podido conectar con la base de datos", e)
-        # finally:
-        #     sqlite_db.close()
-        #     print("🔒 Conexión a la BDD cerrada en conectar_db()")
+            db = sqlite3.connect("obras_urbanas.db")
+            return db
+        except FileNotFoundError:
+            print(
+                "No se ha podido conectar con la base de datos"
+            )  # Agregar info del error
+        else:
+            return db
 
     @classmethod
     def desconectar_db(cls):
         try:
-            db = sqlite_db.close()
+            db = sqlite3.close()
             return db
 
-        except FileNotFoundError as e:
-            print("No se ha podido cerrar  la base de datos", e)  
+        except FileNotFoundError:
+            print("No se ha podido cerrar  la base de datos")  # Agregar info del error
 
     # sentencias necesarias para realizar la creación de la estructura de la base de datos (tablas y relaciones) utilizando el método de instancia “create_tables(list)” del módulo “peewee”.
     @classmethod
@@ -95,7 +97,7 @@ class GestionarObra(ABC):
         print("limpiar_datos")
         df = cls.extraer_datos()
         print("df obtenido: ", df)
-        df_limpio = (
+        cls.df_limpio = (
             df.drop(  # Quita las columnas especificadas
                 columns=[
                     "lat",
@@ -119,16 +121,32 @@ class GestionarObra(ABC):
             .fillna(  # Rellena los valores nulos
                 {
                     "expediente-numero": 0,
-                    "mano_obra": 0,
                     "destacada": "Desconocido",
-                    "contratacion_tipo": "Desconocida",  # No pondría 'no posee', porque un tipo tiene que tener. Es desconocido
+                    "contratacion_tipo": "Desconocida",
+                    "tipo": "Desconocido",
+                    "descripcion": "Desconocido",
+                    "barrio": "Desconocido",
+                    "direccion": "Desconocido",
+                    "licitacion_oferta_empresa": "Desconocido",
+                    "nro_contratacion": "Desconocido",
+                    "cuit_contratista": "Desconocido",
+                    "comuna": 0,
+                    "monto_contrato": 0,
+                    "fecha_inicio": 0,
+                    "fecha_fin_inicial": 0,
+                    "plazo_meses": 0,
+                    "licitacion_anio": 0,
+                    "mano_obra": 0,
+                    "financiamiento": "Desconocido",
                 }
             )
         )
-        # print("df df_limpio: ", df_limpio)
-        print("df df_limpio: ", df_limpio["monto_contrato"])
-
-        return df_limpio
+        print("df df_limpio: ", cls.df_limpio)
+        cls.df_limpio.to_csv(
+            "datos_limpios.csv", index=False
+        )  # Aca creamos csv con datos limpios.
+        # print("df df_limpio: ", df_limpio["monto_contrato"])
+        return cls.df_limpio
 
     """sentencias necesarias para crear nuevas instancias de Obra. Se deben considerar los siguientes requisitos:
     • Todos los valores requeridos para la creación de estas nuevas instancias deben ser ingresados por teclado.
@@ -138,9 +156,64 @@ class GestionarObra(ABC):
     """
 
     @classmethod
-    # 🟡 Agregar manejo de errores
-    def cargar_datos(cls, limpiar_datos):
-        pass
+    # 🟡 Agregar manejo de errores // obra.create() -> crear la tabla con el df filtrado.
+    def cargar_datos(cls, df_limpio):
+        try:
+            print("cargar_datos")
+            for index, row in df_limpio.iterrows():
+                # print("etapa=row['etapa']", row["etapa"])
+                # print(row['etapa'])
+                # etapa = Etapa.get_or_create(etapa=row["etapa"] or "Desconocida")
+                # tipo = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
+                # area = AreaResponsable.get_or_create(
+                #     area_responsable=row["area_responsable"] or "Desconocida"
+                # )
+
+                ubicacion = Ubicacion.get_or_create(
+                    comuna=row["comuna"],
+                    barrio=row["barrio"],
+                    direccion=row["direccion"],
+                    # nombre_calle=row["nombre_calle"],
+                    #altura=row["altura"],
+                )
+
+                # contratacion = Contratacion.get_or_create(
+                #     contratacion_tipo=row["contratacion_tipo"],
+                #     nro_contratacion=row["nro_contratacion"],
+                #     cuit_contratista=row["cuit_contratista"],
+                # )
+
+                # print("etapa=row['etapa']", row["etapa"]) # Adjudicada
+                # print("nombre=row['tipo']", row["tipo"]) # Arquitectura
+                # print("nombre=row['area_responsable']", row["area_responsable"]) # Subsecretaría de Proyectos y Obras
+                # print("comuna=row['comuna']", row["comuna"]) # 4
+
+                # Obra.create(
+                #     entorno=row["entorno"],
+                #     nombre=row["nombre"] or "Sin nombre",
+                #     descripcion=row["descripcion"],
+                #     etapa=etapa,
+                #     tipo=tipo,
+                #     area_responsable=area,
+                #     ubicacion=ubicacion,
+                #     monto_contrato=row["monto_contrato"],
+                #     mano_obra=row["mano_obra"],
+                #     destacada=row["destacada"],
+                #     fecha_inicio=row["fecha_inicio"],
+                #     fecha_fin_inicial=row["fecha_fin_inicial"],
+                #     contratacion=contratacion,
+                #     plazo_meses=row["plazo_meses"],
+                #     porcentaje_avance=row["porcentaje_avance"],
+                #     licitacion_oferta_empresa=["licitacion_oferta_empresa"],
+                #     licitacion_anio=row["licitacion_anio"],
+                #     expediente_numero=row["expediente_numero"],
+                #     financiamiento=row["financiamiento"],
+                # )
+
+            print("Datos cargados.")
+            print("Se realizó la carga de datos cargar_datos")
+        except Exception as e:
+            print("Error al cargar_datos", e)
 
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
     @classmethod
@@ -149,6 +222,7 @@ class GestionarObra(ABC):
         pass
 
 
-# GestionarObra.extraer_datos()
+GestionarObra.extraer_datos()
 GestionarObra.limpiar_datos()
 GestionarObra.mapear_orm()
+GestionarObra.cargar_datos(GestionarObra.df_limpio)

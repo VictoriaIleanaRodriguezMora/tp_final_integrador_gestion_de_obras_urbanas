@@ -45,8 +45,9 @@ class AreaResponsable(BaseModel):
 class Ubicacion(BaseModel):
     comuna = IntegerField()  # No sé si la comuna es la mejor opcion para ID
     barrio = CharField()
-    nombre_calle = CharField()
-    altura = CharField()
+    #nombre_calle = CharField()
+    #altura = CharField()
+    direccion = CharField()
 
     class Meta:
         db_table = "Ubicacion"
@@ -119,6 +120,6 @@ except OperationalError as e:
     print("Error al conectarse a la BD ", e)
     sqlite_db.close()
     exit()
-finally:
-    sqlite_db.close()
-    print("🔒 Conexión a la BDD cerrada")
+# finally:
+#     sqlite_db.close()
+#     print("🔒 Conexión a la BDD cerrada")
