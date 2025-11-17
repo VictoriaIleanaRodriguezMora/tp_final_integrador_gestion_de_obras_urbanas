@@ -110,7 +110,7 @@ class Obra(BaseModel):
 try:
     sqlite_db.connect()
     print("🔓 Conexión a la BDD abierta")
-    # 🔽Crea el archivo obras_urbanas.db, sin registros
+    # 🔽 Crea el archivo obras_urbanas.db, sin registros
     sqlite_db.create_tables(
         [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
     )

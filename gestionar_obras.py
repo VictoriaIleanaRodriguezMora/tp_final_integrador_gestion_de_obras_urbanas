@@ -33,7 +33,8 @@ import pandas as pd
 from peewee import *
 from modelo_orm import *
 import sqlite3
-from modelo_orm import db
+from modelo_orm import sqlite_db
+
 
 class GestionarObra(ABC):
 
@@ -58,24 +59,22 @@ class GestionarObra(ABC):
     @classmethod
     def conectar_db(cls):
         try:
-            db = sqlite3.connect("obras_urbanas.db")
-            return db
-        except FileNotFoundError:
-            print(
-                "No se ha podido conectar con la base de datos"
-            )  # Agregar info del error
-        else:
-            return db
+            sqlite_db.connect()
+            print("🔓 Conexión a la BDD abierta en conectar_db()")
+        except FileNotFoundError as e:
+            print("No se ha podido conectar con la base de datos", e)
+        finally:
+            sqlite_db.close("obras_urbanas.db")
+            print("🔒 Conexión a la BDD cerrada en conectar_db()")
 
     @classmethod
     def desconectar_db(cls):
         try:
-            db = sqlite3.close()
+            db = sqlite_db.close()
             return db
 
-        except FileNotFoundError:
-            print("No se ha podido cerrar  la base de datos")  # Agregar info del error
-
+        except FileNotFoundError as e:
+            print("No se ha podido cerrar  la base de datos", e)  
 
     # sentencias necesarias para realizar la creación de la estructura de la base de datos (tablas y relaciones) utilizando el método de instancia “create_tables(list)” del módulo “peewee”.
     @classmethod
@@ -83,11 +82,10 @@ class GestionarObra(ABC):
     def mapear_orm(cls):
         print("mapear_orm")
         GestionarObra.conectar_db()
-        db.create_tables(  # db no existe
+        sqlite_db.create_tables(  # db no existe
             [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
         )
         GestionarObra.conectar_db()
-
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
     # ? No entiendo lo de: utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
