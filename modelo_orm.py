@@ -93,6 +93,8 @@ class Obra(BaseModel):
     class Meta:
         db_table = "Obra"
 
+    # ❗ Son acciones de una obra ya existente
+    # “Tengo una obra creada en la BD → aplico una acción → guardo cambios”.
     # métodos de instancia con el objetivo de definir las diferentes etapas de avance de obra
     # Los métodos de instancia necesitan una instancia de una clase y pueden acceder dicha instancia por medio de self
 
@@ -131,18 +133,27 @@ class Obra(BaseModel):
     def incrementar_mano_obra(self):
         pass
 
-    # dejo afuera las columnas que no considero relevantes
-    """
-    lat = CharField()
-    lng = CharField()
-    imagen_1 = CharField()
-    imagen_2 = CharField()
-    imagen_3 = CharField()
-    imagen_4 = CharField()
-    beneficiarios = CharField()
-    compromiso = CharField()
-    ba_elige = CharField()
-    link_interno = CharField()
-    pliego_descarga = CharField()
-    estudio_ambiental_descarga = CharField()
-    """
+
+# PASOS PARA PROBAR ESTOS MÉTODOS DE INSTANCIA
+"""
+1) Levantar la bdd
+2) Obtener una Obra cualquiera por nombre o id, (O crear una de prueba)
+3) Llamar a los métodos de instancia:
+    obra.iniciar_obra()
+    obra.actualizar_porcentaje_avance(80)
+    obra.finalizar_obra()
+
+
+
+GestionarObra.conectar_db()
+obra = Obra.get_by_id(1)
+obra.nuevo_proyecto()
+obra.iniciar_contratacion()
+obra.adjudicar_obra("Empresa SA", "30-12345678-9")
+obra.iniciar_obra(date(2025,1,3), date(2025,12,20))
+obra.actualizar_porcentaje_avance(40)
+obra.incrementar_plazo(2)
+obra.finalizar_obra()
+
+
+"""
