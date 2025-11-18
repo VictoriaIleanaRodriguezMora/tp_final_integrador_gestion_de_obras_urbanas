@@ -116,7 +116,7 @@ class GestionarObra(ABC):
                     "mano_obra": 0,
                     "financiamiento": "Desconocido",
                     "etapa": "Desconocida",
-                    "porcentaje_avance": 0
+                    "porcentaje_avance": 0,
                 }
             )
         )
@@ -163,7 +163,9 @@ class GestionarObra(ABC):
 
                 etapa_obj, booleano = Etapa.get_or_create(etapa=row["etapa"])
 
-                tipo_obj, booleano = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
+                tipo_obj, booleano = TipoObra.get_or_create(
+                    tipo_obra=row["tipo"] or "Desconocido"
+                )
 
                 area_obj, booleano = AreaResponsable.get_or_create(
                     area_responsable=row["area_responsable"] or "Desconocida"
@@ -198,12 +200,135 @@ class GestionarObra(ABC):
 
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
     @classmethod
+    # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
+    @classmethod
     # 🟡 Agregar manejo de errores
-    def nueva_obra(self):
-        pass
+    def nueva_obra(
+        cls,
+    ):
+        try:
+            # Area responsable
+            while True:
+                area_nombre = input("Ingrese el área responsable: ").strip()
+                nva_area_responsable = AreaResponsable.get_or_none(
+                    area_responsable=area_nombre
+                )
+                if nva_area_responsable:
+                    break
+                print("Area no encontrada, intente nuevamente.")
+
+            # Contratación
+            while True:
+                contratacion_nombre = input("Ingrese número de contratación: ").strip()
+                tipo_contratacion = input("Ingrese tipo de contratación: ").strip()
+                nvo_cuit = input("Ingrese cuit: ").strip()
+                nva_contratacion = Contratacion.get_or_none(
+                    nro_contratacion=contratacion_nombre,
+                    contratacion_tipo=tipo_contratacion,
+                    cuit_contratista=nvo_cuit,
+                )
+                if nva_contratacion:
+                    break
+                print("Contratación no encontrada, intente nuevamente.")
+
+            # Etapa
+            while True:
+                etapa_nombre = input("Ingrese estado de la etapa: ").strip()
+                nva_etapa = Etapa.get_or_none(etapa=etapa_nombre)
+                if nva_etapa:
+                    break
+                print("Etapa no encontrada, intente nuevamente.")
+
+                # Tipo de obra
+            while True:
+                tipo_nombre = input("Ingrese el tipo de obra: ").strip()
+                nvo_tipo = TipoObra.get_or_none(tipo_obra=tipo_nombre)
+                if nvo_tipo:
+                    break
+                print("Etapa no encontrada, intente nuevamente.")
+
+                # Ubicación
+            while True:
+                comuna_nombre = input("Ingrese la comuna: ").strip()
+                barrio_nombre = input("Ingrese el barrio: ").strip()
+                nva_direccion = input("Ingrese la dirección: ").strip()
+                nva_ubicacion = Ubicacion.get_or_none(
+                    comuna=comuna_nombre, barrio=barrio_nombre, direccion=nva_direccion
+                )
+                if nva_ubicacion:
+                    break
+                print("Ubicación no encontrada, intente nuevamente.")
+
+            # Nueva obra.
+            nombre = input("Ingrese el nombre de la obra: ").strip()
+            descripcion = input("Ingrese la descripción de la obra: ").strip()
+            expediente_numero = input("Ingrese número de expediente: ").strip()
+            entorno = input("Ingrese el entorno: ").strip()
+            monto_contrato = input("Ingrese el  monto del contrato: ").strip()
+            while True:
+                fecha_inicio = input(
+                    "Ingrese la fecha de inicio (YYYY-MM-DD): "
+                ).strip()
+                try:
+                    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+                    break
+                except ValueError:
+                    print("Formato de fecha incorrecto. Use YYYY-MM-DD.")
+
+            while True:
+                fecha_fin_inicial = input(
+                    "Ingrese la fecha de finalización (YYYY-MM-DD): "
+                ).strip()
+                try:
+                    fecha_fin_inicial = datetime.strptime(
+                        fecha_fin_inicial, "%Y-%m-%d"
+                    ).date()
+                    break
+                except ValueError:
+                    print("Formato de fecha incorrecto. Use YYYY-MM-DD.")
+
+            plazo_meses = int(input("Ingrese el plazo en meses: ")).strip()
+            porcentaje_avance = int(input("Ingrese el porcentaje de avance: ")).strip()
+            licitacion_oferta_empresa = input("Ingrese la empresa: ").strip()
+            licitacion_anio = input("Ingrese el año: ").strip()
+            mano_obra = int(input("Ingrese la mano de obra: ")).strip()
+            destacada = input("Ingrese si es una obra destacada : SI/NO: ").strip()
+            financiamiento = input("Ingrese su financiamiento: ").strip()
+
+            nueva_obra = Obra(
+                area_responsable_fk=nva_area_responsable,
+                contratacion_tipo_fk=nva_contratacion,
+                etapa_fk=nva_etapa,
+                tipo_obra_fk=nvo_tipo,
+                ubicacion_fk=nva_ubicacion,
+                nombre=nombre,
+                descripcion=descripcion,
+                expediente_numero=expediente_numero,
+                entorno=entorno,
+                monto_contrato=monto_contrato,
+                fecha_inicio=fecha_inicio,
+                fecha_fin_inicial=fecha_fin_inicial,
+                plazo_meses=plazo_meses,
+                porcentaje_avance=porcentaje_avance,
+                licitacion_oferta_empresa=licitacion_oferta_empresa,
+                licitacion_anio=licitacion_anio,
+                mano_obra=mano_obra,
+                destacada=destacada,
+                financiamiento=financiamiento,
+            )
+
+            nueva_obra.save()
+            print(f"Obra '{nueva_obra.nombre}' creada exitosamente.")
+            return nueva_obra
+
+        except Exception as e:
+            print(f"[ERROR] - No se pudo crear la nueva Obra: {e}")
+            return None
 
 
 GestionarObra.extraer_datos()
 GestionarObra.limpiar_datos()
 GestionarObra.mapear_orm()
 GestionarObra.cargar_datos(GestionarObra.df_limpio)
+
+GestionarObra.nueva_obra()
