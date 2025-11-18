@@ -11,11 +11,13 @@ import sqlite3
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Creacion de la bdd
 sqlite_db = SqliteDatabase(os.getenv("DB_NAME"))
 print(os.getenv("DB_NAME"))
+
 
 # Este es nuetro modelo normalizado. Basado en pewee
 class BaseModel(Model):
@@ -31,7 +33,7 @@ class Etapa(BaseModel):
 
 
 class TipoObra(BaseModel):
-    tipo_obra = CharField()
+    tipo_obra = CharField(unique=True, null=False)
 
     class Meta:
         db_table = (
@@ -40,7 +42,7 @@ class TipoObra(BaseModel):
 
 
 class AreaResponsable(BaseModel):
-    area_responsable = CharField()
+    area_responsable = CharField(unique=True, null=False)
 
     class Meta:
         db_table = "AreaResponsable"
@@ -49,8 +51,8 @@ class AreaResponsable(BaseModel):
 class Ubicacion(BaseModel):
     comuna = IntegerField()  # No sé si la comuna es la mejor opcion para ID
     barrio = CharField()
-    #nombre_calle = CharField()
-    #altura = CharField()
+    # nombre_calle = CharField()
+    # altura = CharField()
     direccion = CharField()
 
     class Meta:
@@ -69,13 +71,11 @@ class Contratacion(BaseModel):
 
 class Obra(BaseModel):
     expediente_numero = CharField(unique=True)
-    etapa_fk = ForeignKeyField(Etapa, backref="etapa")  # FK
-    ubicacion_fk = ForeignKeyField(Ubicacion, backref="ubicacion")  # FK
-    tipo_obra_fk = ForeignKeyField(TipoObra, backref="tipo_obra")  # FK
-    contratacion_tipo_fk = ForeignKeyField(Contratacion, backref="contratacion")  # FK
-    area_responsable_fk = ForeignKeyField(
-        AreaResponsable, backref="area_responsable"
-    )  # FK
+    etapa_fk = ForeignKeyField(Etapa)  # FK
+    ubicacion_fk = ForeignKeyField(Ubicacion)  # FK
+    tipo_obra_fk = ForeignKeyField(TipoObra)  # FK
+    contratacion_tipo_fk = ForeignKeyField(Contratacion)  # FK
+    area_responsable_fk = ForeignKeyField(AreaResponsable)  # FK
     entorno = CharField()
     nombre = CharField()
     descripcion = CharField()
@@ -108,5 +108,3 @@ class Obra(BaseModel):
     pliego_descarga = CharField()
     estudio_ambiental_descarga = CharField()
     """
-
-
