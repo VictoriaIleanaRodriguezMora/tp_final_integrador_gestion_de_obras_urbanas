@@ -7,6 +7,7 @@
 PENDIENTE:
 🟡 No existe la comuna cero. Tratar eso.
 🟡 Deberiamos verificar cuantos tipos distintos de datos hay
+🟡Unificar mensaje de error
 
 ERRORES
 ✅Error al cargar_datos NOT NULL constraint failed: Etapa.etapa

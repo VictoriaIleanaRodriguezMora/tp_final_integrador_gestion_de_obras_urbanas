@@ -23,9 +23,6 @@ class GestionarObra(ABC):
         except FileNotFoundError as e:
             print("No se ha encontrado el archivo csv", e)
 
-    #  else:
-    #      return df
-
     # sentencias necesarias para realizar la conexión a la base de datos “obras_urbanas.db”.
     @classmethod
     def conectar_db(cls):
@@ -323,10 +320,47 @@ class GestionarObra(ABC):
             print(f"[ERROR] - No se pudo crear la nueva Obra: {e}")
             return None
 
+    @classmethod
 
-GestionarObra.extraer_datos()
-GestionarObra.limpiar_datos()
-GestionarObra.mapear_orm()
-GestionarObra.cargar_datos(GestionarObra.df_limpio)
+    # Ver los campos únicos de cada tabla
+    def obtener_campos_unicos(cls, modelo, columna):
+        # Devuelve los valores únicos de la columna que se le dice
+        # Validar que el modelo sea un modelo Peewee
+        if not hasattr(modelo, "_meta"):
+            raise TypeError(f"{modelo.__name__} no es un modelo Peewee válido.")
 
-GestionarObra.nueva_obra()
+        # Validar que la columna exista
+        if columna not in modelo._meta.fields:
+            raise ValueError(
+                f"La columna '{columna}' no existe en el modelo {modelo.__name__}."
+            )
+
+        campo = modelo._meta.fields[columna]
+
+        # SELECT DISTINCT columna. UNIQUE de pandas
+        consulta = modelo.select(campo).distinct().tuples()
+
+        # Valor es (3,) valor[0] es 3
+        rtado = [valor[0] for valor in consulta]
+        print(rtado)
+        return rtado
+
+
+# GestionarObra.extraer_datos()
+# GestionarObra.limpiar_datos()
+# GestionarObra.mapear_orm()
+# GestionarObra.cargar_datos(GestionarObra.df_limpio)
+
+# GestionarObra.nueva_obra()
+
+obra = Obra.get_by_id(1)
+# print(f"Obra seleccionada: ", obra)
+# print("Obra completa:", obra.__data__)
+
+# Ver los campos únicos de cada tabla
+# GestionarObra.obtener_campos_unicos(Etapa, "etapa")
+# GestionarObra.obtener_campos_unicos(AreaResponsable, "area_responsable")
+# GestionarObra.obtener_campos_unicos(Ubicacion, "direccion")
+# GestionarObra.obtener_campos_unicos(Contratacion, "contratacion_tipo")
+# GestionarObra.obtener_campos_unicos(Obra, "monto_contrato")
+obra.nuevo_proyecto("Rescindida")
