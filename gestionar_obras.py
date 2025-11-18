@@ -171,35 +171,33 @@ class GestionarObra(ABC):
                     area_responsable=row["area_responsable"] or "Desconocida"
                 )
 
-            Obra.create(
-                expediente_numero=row["expediente_numero"],
-                etapa_fk=etapa_obj,
-                ubicacion_fk=ubicacion_obj,
-                tipo_obra_fk=tipo_obj,
-                contratacion_tipo_fk=contratacion_obj,
-                area_responsable_fk=area_obj,
-                entorno=row["entorno"],
-                nombre=row["nombre"] or "Sin nombre",
-                descripcion=row["descripcion"],
-                monto_contrato=row["monto_contrato"],
-                fecha_inicio=row["fecha_inicio"],
-                fecha_fin_inicial=row["fecha_fin_inicial"],
-                plazo_meses=row["plazo_meses"],
-                porcentaje_avance=row["porcentaje_avance"],
-                licitacion_oferta_empresa="licitacion_oferta_empresa",
-                licitacion_anio=row["licitacion_anio"],
-                mano_obra=row["mano_obra"],
-                destacada=row["destacada"],
-                financiamiento=row["financiamiento"],
-            )
+                Obra.create(
+                    expediente_numero=row["expediente_numero"],
+                    etapa_fk=etapa_obj,
+                    ubicacion_fk=ubicacion_obj,
+                    tipo_obra_fk=tipo_obj,
+                    contratacion_tipo_fk=contratacion_obj,
+                    area_responsable_fk=area_obj,
+                    entorno=row["entorno"],
+                    nombre=row["nombre"] or "Sin nombre",
+                    descripcion=row["descripcion"],
+                    monto_contrato=row["monto_contrato"],
+                    fecha_inicio=row["fecha_inicio"],
+                    fecha_fin_inicial=row["fecha_fin_inicial"],
+                    plazo_meses=row["plazo_meses"],
+                    porcentaje_avance=row["porcentaje_avance"],
+                    licitacion_oferta_empresa="licitacion_oferta_empresa",
+                    licitacion_anio=row["licitacion_anio"],
+                    mano_obra=row["mano_obra"],
+                    destacada=row["destacada"],
+                    financiamiento=row["financiamiento"],
+                )
 
             print("Datos cargados.")
             print("Se realizó la carga de datos cargar_datos")
         except Exception as e:
             print("Error al cargar_datos", e)
 
-    # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
-    @classmethod
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
     @classmethod
     # 🟡 Agregar manejo de errores

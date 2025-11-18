@@ -70,7 +70,7 @@ class Contratacion(BaseModel):
 
 
 class Obra(BaseModel):
-    expediente_numero = CharField(unique=True)
+    expediente_numero = CharField()
     etapa_fk = ForeignKeyField(Etapa)  # FK
     ubicacion_fk = ForeignKeyField(Ubicacion)  # FK
     tipo_obra_fk = ForeignKeyField(TipoObra)  # FK
