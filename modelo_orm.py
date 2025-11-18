@@ -96,31 +96,39 @@ class Obra(BaseModel):
     # métodos de instancia con el objetivo de definir las diferentes etapas de avance de obra
     # Los métodos de instancia necesitan una instancia de una clase y pueden acceder dicha instancia por medio de self
 
-    def nuevo_proyecto():
+    # Debe insertar una nueva etapa al Modelo, a las tablas
+    def nuevo_proyecto(self):
         pass
 
-    def iniciar_contratacion():
+    # Debe insertar un nuevo tipo de contratacion al Modelo, a las tablas
+    def iniciar_contratacion(self):
         pass
 
-    def adjudicar_obra():
+    # Debe pedir: nombre, cuit de la empresa que ajudicará una obra. Y número de expediente
+    def adjudicar_obra(self):
         pass
 
-    def iniciar_obra():
+    # Debe pedir: nueva fecha de inicio, nueva fecha de fin inicial
+    def iniciar_obra(self):
         pass
 
-    def actualizar_porcentaje_avance():
+    # Debe pedir: un número, el nuevo porcentaje a actualizar
+    def actualizar_porcentaje_avance(self):
         pass
 
-    def finalizar_obra():
+    # Al invocar este método, el porcentaje de avance pasa a 100. Y la etapa = 'Finalizada'
+    def finalizar_obra(self):
         pass
 
-    def rescindir_obra():
+    # Al invocar este método la etapa =  'Rescindida'
+    def rescindir_obra(self):
         pass
 
-    def incrementar_plazo():
+    # Opcionales
+    def incrementar_plazo(self):
         pass
 
-    def incrementar_mano_obra():
+    def incrementar_mano_obra(self):
         pass
 
     # dejo afuera las columnas que no considero relevantes
