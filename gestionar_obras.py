@@ -145,14 +145,6 @@ class GestionarObra(ABC):
         try:
             print("cargar_datos")
             for index, row in df_limpio.iterrows():
-                # NO ANDA 🔽
-                etapa = (row["etapa"] or "").strip() or "Desconocida"
-                etapa = Etapa.get_or_create(etapa=row["etapa"])
-                # tipo = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
-                # area = AreaResponsable.get_or_create(
-                #    area_responsable=row["area_responsable"] or "Desconocida"
-                # )
-
                 # SÍ ANDA 🔽
                 ubicacion = Ubicacion.get_or_create(
                     comuna=row["comuna"],
@@ -166,6 +158,14 @@ class GestionarObra(ABC):
                     contratacion_tipo=row["contratacion_tipo"],
                     nro_contratacion=row["nro_contratacion"],
                     cuit_contratista=row["cuit_contratista"],
+                )
+               
+                etapa = Etapa.get_or_create(etapa=row["etapa"])
+
+                tipo = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
+
+                area = AreaResponsable.get_or_create(
+                   area_responsable=row["area_responsable"] or "Desconocida"
                 )
 
                 # Obra.create(
