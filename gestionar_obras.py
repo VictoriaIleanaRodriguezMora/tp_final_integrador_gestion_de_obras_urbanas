@@ -116,6 +116,7 @@ class GestionarObra(ABC):
                     "mano_obra": 0,
                     "financiamiento": "Desconocido",
                     "etapa": "Desconocida",
+                    "porcentaje_avance": 0
                 }
             )
         )
@@ -146,7 +147,7 @@ class GestionarObra(ABC):
             print("cargar_datos")
             for index, row in df_limpio.iterrows():
                 # SÍ ANDA 🔽
-                ubicacion = Ubicacion.get_or_create(
+                ubicacion_obj, booleano = Ubicacion.get_or_create(
                     comuna=row["comuna"],
                     barrio=row["barrio"],
                     direccion=row["direccion"],
@@ -154,41 +155,41 @@ class GestionarObra(ABC):
                     # altura=row["altura"],
                 )
 
-                contratacion = Contratacion.get_or_create(
+                contratacion_obj, booleano = Contratacion.get_or_create(
                     contratacion_tipo=row["contratacion_tipo"],
                     nro_contratacion=row["nro_contratacion"],
                     cuit_contratista=row["cuit_contratista"],
                 )
-               
-                etapa = Etapa.get_or_create(etapa=row["etapa"])
 
-                tipo = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
+                etapa_obj, booleano = Etapa.get_or_create(etapa=row["etapa"])
 
-                area = AreaResponsable.get_or_create(
-                   area_responsable=row["area_responsable"] or "Desconocida"
+                tipo_obj, booleano = TipoObra.get_or_create(tipo_obra=row["tipo"] or "Desconocido")
+
+                area_obj, booleano = AreaResponsable.get_or_create(
+                    area_responsable=row["area_responsable"] or "Desconocida"
                 )
 
-                # Obra.create(
-                #     entorno=row["entorno"],
-                #     nombre=row["nombre"] or "Sin nombre",
-                #     descripcion=row["descripcion"],
-                #     etapa=etapa,
-                #     tipo=tipo,
-                #     area_responsable=area,
-                #     ubicacion=ubicacion,
-                #     monto_contrato=row["monto_contrato"],
-                #     mano_obra=row["mano_obra"],
-                #     destacada=row["destacada"],
-                #     fecha_inicio=row["fecha_inicio"],
-                #     fecha_fin_inicial=row["fecha_fin_inicial"],
-                #     contratacion=contratacion,
-                #     plazo_meses=row["plazo_meses"],
-                #     porcentaje_avance=row["porcentaje_avance"],
-                #     licitacion_oferta_empresa=["licitacion_oferta_empresa"],
-                #     licitacion_anio=row["licitacion_anio"],
-                #     expediente_numero=row["expediente_numero"],
-                #     financiamiento=row["financiamiento"],
-                # )
+            Obra.create(
+                expediente_numero=row["expediente_numero"],
+                etapa_fk=etapa_obj,
+                ubicacion_fk=ubicacion_obj,
+                tipo_obra_fk=tipo_obj,
+                contratacion_tipo_fk=contratacion_obj,
+                area_responsable_fk=area_obj,
+                entorno=row["entorno"],
+                nombre=row["nombre"] or "Sin nombre",
+                descripcion=row["descripcion"],
+                monto_contrato=row["monto_contrato"],
+                fecha_inicio=row["fecha_inicio"],
+                fecha_fin_inicial=row["fecha_fin_inicial"],
+                plazo_meses=row["plazo_meses"],
+                porcentaje_avance=row["porcentaje_avance"],
+                licitacion_oferta_empresa="licitacion_oferta_empresa",
+                licitacion_anio=row["licitacion_anio"],
+                mano_obra=row["mano_obra"],
+                destacada=row["destacada"],
+                financiamiento=row["financiamiento"],
+            )
 
             print("Datos cargados.")
             print("Se realizó la carga de datos cargar_datos")
