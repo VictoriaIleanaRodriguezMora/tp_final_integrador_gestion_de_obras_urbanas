@@ -1,0 +1,28 @@
+def nuevo_proyecto(self, tipo_obra_nombre, area_responsable_nombre, barrio_nombre):
+    try:
+        # Etapa inicial: Proyecto
+        etapa_proyecto, created = Etapa.get_or_create(nombre="Proyecto")
+        self.etapa = etapa_proyecto
+
+        # Tipo de obra
+        tipo_obra, _ = TipoObra.get_or_create(nombre=tipo_obra_nombre)
+        self.tipo_obra = tipo_obra
+
+        # Área responsable
+        area_responsable, _ = AreaResponsable.get_or_create(nombre=area_responsable_nombre)
+        self.area_responsable = area_responsable
+
+        # Barrio (si no existe, se crea con comuna 0 por defecto)
+        barrio = Barrio.get_or_none(nombre=barrio_nombre)
+        if not barrio:
+            print(f"Advertencia: El barrio '{barrio_nombre}' no existe en la BD. Se creará con comuna 0.")
+            barrio = Barrio.create(nombre=barrio_nombre, comuna=0)
+        self.barrio = barrio
+
+        # Persistir cambios
+        self.save()
+        print(f"Obra '{self.nombre}' iniciada como 'Proyecto'.")
+        return True
+    except Exception as e:
+        print(f"Error al iniciar nuevo proyecto para obra '{self.nombre}': {e}")
+        return False
