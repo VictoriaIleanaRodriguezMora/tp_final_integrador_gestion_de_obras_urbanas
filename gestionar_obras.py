@@ -4,7 +4,7 @@ from peewee import *
 from modelo_orm import *
 import sqlite3
 from modelo_orm import sqlite_db
-from datetime import *
+from datetime import datetime, date
 
 import os
 from dotenv import load_dotenv
@@ -281,30 +281,29 @@ class GestionarObra(ABC):
 
             while True:
                 fecha_inicio = input(
-                    "Ingrese la fecha de inicio (YYYY-MM-DD): "
+                    "Ingrese la fecha de inicio (DD/MM/YYYY): "
                 ).strip()
                 try:
-                    fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+                    fecha_inicio = datetime.strptime(fecha_inicio, "%d/%m/%Y").date()
                     break
                 except ValueError:
-                    print("Formato de fecha incorrecto. Use YYYY-MM-DD.")
+                    print("Formato de fecha incorrecto. Use DD/MM/YYYY.")
 
             while True:
                 fecha_fin_inicial = input(
-                    "Ingrese la fecha de finalización (YYYY-MM-DD): "
+                    "Ingrese la fecha de finalización (DD/MM/YYYY): "
                 ).strip()
                 try:
-                    fecha_fin_inicial = datetime.strptime
-                    (fecha_fin_inicial, "%Y-%m-%d").date()
+                    fecha_fin_inicial = datetime.strptime(fecha_fin_inicial, "%d/%m/%Y").date()
                     break
                 except ValueError:
-                    print("Formato de fecha incorrecto. Use YYYY-MM-DD.")
+                    print("Formato de fecha incorrecto. Use DD/MM/YYYY.")
 
-            plazo_meses = int(input("Ingrese el plazo en meses: ")).strip()
-            porcentaje_avance = int(input("Ingrese el porcentaje de avance: ")).strip()
+            plazo_meses = int(input("Ingrese el plazo en meses: "))
+            porcentaje_avance = int(input("Ingrese el porcentaje de avance: "))
             licitacion_oferta_empresa = input("Ingrese la empresa: ").strip()
             licitacion_anio = input("Ingrese el año: ").strip()
-            mano_obra = int(input("Ingrese la mano de obra: ")).strip()
+            mano_obra = int(input("Ingrese la mano de obra: "))
             destacada = input("Ingrese si es una obra destacada : SI/NO: ").strip()
             financiamiento = input("Ingrese su financiamiento: ").strip()
 
