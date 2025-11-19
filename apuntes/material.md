@@ -1,6 +1,7 @@
 ### Python
 - https://www.w3sch
 - https://www.w3schools.com/python/python_datetime.asp
+- https://www.w3schools.com/python/ref_dictionary_items.asp
 
 ### Pewee
 - https://docs.peewee-orm.com/en/latest/

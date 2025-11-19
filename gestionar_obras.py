@@ -14,6 +14,14 @@ CVS_PATH = os.getenv("CVS_PATH")
 
 from datetime import *
 
+from utilities.utility_nueva_obra import (
+    utility_nueva_obra,
+    utility_nueva_obra_multi,
+    pedir_str,
+    pedir_int,
+    pedir_fecha,
+)
+
 
 class GestionarObra(ABC):
     df_limpio = []
@@ -55,7 +63,6 @@ class GestionarObra(ABC):
 
     # sentencias necesarias para realizar la creación de la estructura de la base de datos (tablas y relaciones) utilizando el método de instancia “create_tables(list)” del módulo “peewee”.
     @classmethod
-    # 🟡 Agregar manejo de errores
     def mapear_orm(cls):
         print("[MÉTODO] mapear_orm")
         try:
@@ -63,6 +70,9 @@ class GestionarObra(ABC):
             sqlite_db.create_tables(
                 [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
             )
+
+            print("✅ Datos mapeados")
+            print("✨ Los datos se mapearon correctamente mapear_orm")
         except Exception as e:
             print("[ERROR] mapear_orm - Error al cargar_datos", e)
         finally:
@@ -149,11 +159,13 @@ class GestionarObra(ABC):
             # 🟢 Quitar valores duplicados
             cls.df_limpio = cls.df_limpio.drop_duplicates()
 
-
             cls.df_limpio.to_csv(
                 "datos_limpios.csv", index=False
             )  # Aca creamos csv con datos limpios.
             # print("df df_limpio: ", df_limpio["monto_contrato"])
+
+            print("✅ Datos limpiados")
+            print("✨ Los datos se limpiaron correctamente limpiar_datos")
             return cls.df_limpio
         except Exception as e:
             print("[ERROR] limpiar_datos - Error al limpiar_datos", e)
@@ -212,6 +224,8 @@ class GestionarObra(ABC):
             print("✨ Se realizó la carga de datos cargar_datos")
         except Exception as e:
             print("[ERROR] cargar_datos - Error al cargar_datos", e)
+        finally:
+            GestionarObra.desconectar_db("cargar_datos")
 
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
     @classmethod
@@ -219,93 +233,57 @@ class GestionarObra(ABC):
         try:
             print("[MÉTODO] nueva_obra")
             # Area responsable
-            while True:
-                area_nombre = input("Ingrese el área responsable: ").strip()
-                nueva_area_responsable = AreaResponsable.get_or_none(
-                    area_responsable=area_nombre
-                )
-                if nueva_area_responsable:
-                    break
-                print("Area no encontrada, intente nuevamente.")
+            nueva_area_responsable = utility_nueva_obra(
+                AreaResponsable, "area_responsable", "el área responsable"
+            )
 
             # Contratación
-            while True:
-                contratacion_nombre = input("Ingrese número de contratación: ").strip()
-                tipo_contratacion = input("Ingrese tipo de contratación: ").strip()
-                nuevo_cuit = input("Ingrese cuit: ").strip()
-                nueva_contratacion = Contratacion.get_or_none(
-                    nro_contratacion=contratacion_nombre,
-                    contratacion_tipo=tipo_contratacion,
-                    cuit_contratista=nuevo_cuit,
-                )
-                if nueva_contratacion:
-                    break
-                print("Contratación no encontrada, intente nuevamente.")
+            nueva_contratacion = utility_nueva_obra_multi(
+                Contratacion,
+                {
+                    "nro_contratacion": "el número de contratación",
+                    "contratacion_tipo": "el tipo de contratación",
+                    "cuit_contratista": "el cuit del contratista",
+                },
+            )
 
             # Etapa
-            while True:
-                etapa_nombre = input("Ingrese estado de la etapa: ").strip()
-                nva_etapa = Etapa.get_or_none(etapa=etapa_nombre)
-                if nva_etapa:
-                    break
-                print("Etapa no encontrada, intente nuevamente.")
+            nva_etapa = utility_nueva_obra(Etapa, "etapa", "el estado de la etapa")
 
             # Tipo de obra
-            while True:
-                tipo_nombre = input("Ingrese el tipo de obra: ").strip()
-                nvo_tipo = TipoObra.get_or_none(tipo_obra=tipo_nombre)
-                if nvo_tipo:
-                    break
-                print("Etapa no encontrada, intente nuevamente.")
+            nvo_tipo = utility_nueva_obra(TipoObra, "tipo_obra", "el tipo de obra")
 
             # Ubicación
-            while True:
-                comuna_nombre = input("Ingrese la comuna: ").strip()
-                barrio_nombre = input("Ingrese el barrio: ").strip()
-                nueva_direccion = input("Ingrese la dirección: ").strip()
-                nueva_ubicacion = Ubicacion.get_or_none(
-                    comuna=comuna_nombre,
-                    barrio=barrio_nombre,
-                    direccion=nueva_direccion,
-                )
-                if nueva_ubicacion:
-                    break
-                print("Ubicación no encontrada, intente nuevamente.")
+            nueva_ubicacion = utility_nueva_obra_multi(
+                Ubicacion,
+                {
+                    "comuna": "la comuna",
+                    "barrio": "el barrio",
+                    "direccion": "la dirección",
+                },
+            )
 
             # Nueva obra.
-            nombre = input("Ingrese el nombre de la obra: ").strip()
-            descripcion = input("Ingrese la descripción de la obra: ").strip()
-            expediente_numero = input("Ingrese número de expediente: ").strip()
-            entorno = input("Ingrese el entorno: ").strip()
-            monto_contrato = input("Ingrese el  monto del contrato: ").strip()
+            nombre = pedir_str("Ingrese el nombre de la obra: ")
+            descripcion = pedir_str("Ingrese la descripción de la obra: ")
+            expediente_numero = pedir_str("Ingrese número de expediente: ")
+            entorno = pedir_str("Ingrese el entorno: ")
 
-            while True:
-                fecha_inicio = input(
-                    "Ingrese la fecha de inicio (DD/MM/YYYY): "
-                ).strip()
-                try:
-                    fecha_inicio = datetime.strptime(fecha_inicio, "%d/%m/%Y").date()
-                    break
-                except ValueError:
-                    print("Formato de fecha incorrecto. Use DD/MM/YYYY.")
+            monto_contrato = pedir_int("Ingrese el monto del contrato: ")
+            fecha_inicio = pedir_fecha("Ingrese la fecha de inicio (YYYY-MM-DD): ")
+            fecha_fin_inicial = pedir_fecha(
+                "Ingrese la fecha de finalización (YYYY-MM-DD): "
+            )
 
-            while True:
-                fecha_fin_inicial = input(
-                    "Ingrese la fecha de finalización (DD/MM/YYYY): "
-                ).strip()
-                try:
-                    fecha_fin_inicial = datetime.strptime(fecha_fin_inicial, "%d/%m/%Y").date()
-                    break
-                except ValueError:
-                    print("Formato de fecha incorrecto. Use DD/MM/YYYY.")
+            plazo_meses = pedir_int("Ingrese el plazo en meses: ")
+            porcentaje_avance = pedir_int("Ingrese el porcentaje de avance: ")
 
-            plazo_meses = int(input("Ingrese el plazo en meses: "))
-            porcentaje_avance = int(input("Ingrese el porcentaje de avance: "))
-            licitacion_oferta_empresa = input("Ingrese la empresa: ").strip()
-            licitacion_anio = input("Ingrese el año: ").strip()
-            mano_obra = int(input("Ingrese la mano de obra: "))
-            destacada = input("Ingrese si es una obra destacada : SI/NO: ").strip()
-            financiamiento = input("Ingrese su financiamiento: ").strip()
+            licitacion_oferta_empresa = pedir_str("Ingrese la empresa: ")
+            licitacion_anio = pedir_int("Ingrese el año: ")
+
+            mano_obra = pedir_int("Ingrese la mano de obra: ")
+            destacada = pedir_str("Ingrese si es una obra destacada (SI/NO): ")
+            financiamiento = pedir_str("Ingrese el financiamiento: ")
 
             nueva_obra = Obra(
                 area_responsable_fk=nueva_area_responsable,
@@ -476,7 +454,6 @@ class GestionarObra(ABC):
             except Exception:
                 pass
 
-
     @classmethod
     # Ver los campos únicos de cada tabla
     def obtener_campos_unicos(cls, modelo, columna):
@@ -503,22 +480,27 @@ class GestionarObra(ABC):
         return rtado
 
 
-# GestionarObra.extraer_datos()
-# GestionarObra.limpiar_datos()
-# GestionarObra.mapear_orm()
-# GestionarObra.cargar_datos(GestionarObra.df_limpio)
+# Creacion de estructura y carga de datos
 
-GestionarObra.nueva_obra()
+GestionarObra.extraer_datos()
+GestionarObra.limpiar_datos()
+GestionarObra.mapear_orm()
+GestionarObra.cargar_datos(GestionarObra.df_limpio)
+# Cargar una nueva obra
 
-# print(f"Obra seleccionada: ", obra)
-# print("Obra completa:", obra.__data__)
+# GestionarObra.nueva_obra()
+
 
 # Ver los campos únicos de cada tabla
+
 # GestionarObra.obtener_campos_unicos(Etapa, "etapa")
 # GestionarObra.obtener_campos_unicos(AreaResponsable, "area_responsable")
 # GestionarObra.obtener_campos_unicos(Ubicacion, "direccion")
 # GestionarObra.obtener_campos_unicos(Contratacion, "contratacion_tipo")
 # GestionarObra.obtener_campos_unicos(Obra, "monto_contrato")
+
+
+# Probar flujo
 
 # obra = Obra.get_by_id(1)
 # obra.nuevo_proyecto("Rescindida")
