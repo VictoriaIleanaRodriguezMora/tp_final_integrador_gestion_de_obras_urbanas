@@ -50,11 +50,17 @@ class Ubicacion(BaseModel):
     # altura = CharField()
     direccion = CharField()
 
+    class Meta:
+        constraints = [SQL("UNIQUE(comuna, barrio, direccion)")]
+
 
 class Contratacion(BaseModel):
     contratacion_tipo = CharField()
     nro_contratacion = CharField()
     cuit_contratista = CharField()
+
+    class Meta:
+        constraints = [SQL("UNIQUE(contratacion_tipo, nro_contratacion)")]
 
 
 class Obra(BaseModel):
@@ -76,7 +82,7 @@ class Obra(BaseModel):
     mano_obra = IntegerField()
     destacada = CharField()
     expediente_numero = CharField()
-    financiamiento = CharField()  #
+    financiamiento = CharField(unique=True)  #
 
     # ❗ Son acciones de una obra ya existente
     # “Tengo una obra creada en la BD → aplico una acción → guardo cambios”.

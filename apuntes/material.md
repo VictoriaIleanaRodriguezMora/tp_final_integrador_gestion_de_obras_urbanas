@@ -7,13 +7,20 @@
 - https://foro.recursospython.com/Thread-peewee-IntegrityError-NOT-NULL-constraint-failed-person-name?pid=1391
 - https://www.tutorialspoint.com/peewee/peewee_constraints.htm
 - https://docs.peewee-orm.com/en/latest/peewee/models.html
+- https://docs.peewee-orm.com/en/latest/peewee/example.html
+- https://www.paradigmadigital.com/dev/como-hacer-bases-datos-con-peewee/
+Querying
+- https://docs.peewee-orm.com/en/latest/peewee/querying.html
+- https://docs.peewee-orm.com/en/3.0.0/peewee/querying.html#creating-a-new-record
+- https://docs.peewee-orm.com/en/3.0.0/peewee/api.html#Model.get_or_none
 
 ### Pandas
 - https://pandas.pydata.org/docs/reference/general_functions.html
 - https://www.w3schools.com/python/pandas/ref_df_iterrows.asp
 - https://www.geeksforgeeks.org/python/python-pandas-series-str-strip-lstrip-and-rstrip/
 - https://www.geeksforgeeks.org/python/capitalize-first-letter-of-a-column-in-pandas-dataframe/
-
+- https://www.geeksforgeeks.org/pandas/pandas-dataframe-iterrows/
+- 
 ### SQLite
 - 
 

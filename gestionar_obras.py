@@ -14,6 +14,7 @@ CVS_PATH = os.getenv("CVS_PATH")
 
 from datetime import *
 
+
 class GestionarObra(ABC):
     df_limpio = []
 
@@ -21,8 +22,7 @@ class GestionarObra(ABC):
     @classmethod
     def extraer_datos(cls):
         try:
-            # print('extraer_datos')
-            df = pd.read_csv(CVS_PATH, sep=";", encoding="utf-8")
+            df = pd.read_csv(CVS_PATH, sep=";", encoding="latin1")
             # print(df)
             return df
 
@@ -31,119 +31,133 @@ class GestionarObra(ABC):
 
     # sentencias necesarias para realizar la conexión a la base de datos “obras_urbanas.db”.
     @classmethod
-    def conectar_db(cls):
+    def conectar_db(cls, fn):
         try:
             if sqlite_db.is_closed():
                 sqlite_db.connect()
-        except FileNotFoundError:
+                print(f"🔌 Bdd conectada en {fn}")
+        except FileNotFoundError as e:
             print(
-                "No se ha podido conectar con la base de datos"
-            )  # Agregar info del error
+                "No se ha podido conectar con la base de datos", e
+            )  # 🟡 Agregar info del error
 
+    # sentencias necesarias para realizar la desconexión a la base de datos “obras_urbanas.db”.
     @classmethod
-    def desconectar_db(cls):
+    def desconectar_db(cls, fn):
         try:
             if not sqlite_db.is_closed():
                 sqlite_db.close()
+                print(f"🔌 Bdd desconectada de {fn}")
         except FileNotFoundError:
-            print("No se ha podido cerrar  la base de datos")  # Agregar info del error
+            print(
+                "No se ha podido cerrar  la base de datos"
+            )  # 🟡 Agregar info del error
 
     # sentencias necesarias para realizar la creación de la estructura de la base de datos (tablas y relaciones) utilizando el método de instancia “create_tables(list)” del módulo “peewee”.
     @classmethod
     # 🟡 Agregar manejo de errores
     def mapear_orm(cls):
         print("[MÉTODO] mapear_orm")
-        GestionarObra.conectar_db()
-        sqlite_db.create_tables(  # db no existe
-            [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
-        )
-        GestionarObra.desconectar_db()
+        try:
+            GestionarObra.conectar_db("mapear_orm")
+            sqlite_db.create_tables(
+                [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
+            )
+        except Exception as e:
+            print("[ERROR] mapear_orm - Error al cargar_datos", e)
+        finally:
+            GestionarObra.desconectar_db("mapear_orm")
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
     @classmethod
-    # 🟡 Agregar manejo de errores
     def limpiar_datos(cls):
         print("[MÉTODO] limpiar_datos")
-        df = cls.extraer_datos()
-        # print("df obtenido: ", df)
+        try:
+            df = cls.extraer_datos()
+            # print("df obtenido: ", df)
 
-        # 🟢 Normalizar nombres de columnas
-        df.columns = (
-            df.columns.str.strip()
-            .str.lower()
-            # .str.title()
-            .str.replace("-", "_")
-            .str.replace(" ", "_")
-        )
-
-        # Se crea el cls.df_limpio, donde ya usa las columnas normalizadas de df.columns
-        cls.df_limpio = (
-            df.drop(  # Quita las columnas especificadas
-                columns=[
-                    "lat",
-                    "lng",
-                    "imagen_1",
-                    "imagen_2",
-                    "imagen_3",
-                    "imagen_4",
-                    "beneficiarios",  # Nose si la sacaria
-                    "compromiso",
-                    "ba_elige",
-                    "link_interno",
-                    "pliego_descarga",
-                    "estudio_ambiental_descarga",
-                ]
+            # 🟢 Normalizar nombres de columnas
+            df.columns = (
+                df.columns.str.strip()
+                .str.lower()
+                .str.replace("-", "_")
+                .str.replace(" ", "_")
             )
-            .drop_duplicates()  # Quita filas duplicadas
-            .assign(
-                monto_contrato=df["monto_contrato"].str.strip()
-            )  # Assign agrega una nueva columna al df
-            .fillna(  # Rellena los valores nulos
-                {
-                    "expediente_numero": 0,
-                    "destacada": "Desconocido",
-                    "contratacion_tipo": "Desconocida",
-                    "tipo": "Desconocido",
-                    "descripcion": "Desconocido",
-                    "barrio": "Desconocido",
-                    "direccion": "Desconocido",
-                    "licitacion_oferta_empresa": "Desconocido",
-                    "nro_contratacion": "Desconocido",
-                    "cuit_contratista": "Desconocido",
-                    "comuna": 0,
-                    "monto_contrato": 0,
-                    "fecha_inicio": 0,
-                    "fecha_fin_inicial": 0,
-                    "plazo_meses": 0,
-                    "licitacion_anio": 0,
-                    "mano_obra": 0,
-                    "financiamiento": "Desconocido",
-                    "etapa": "Desconocida",
-                    "porcentaje_avance": 0,
-                }
+
+            # Se crea el cls.df_limpio, donde ya usa las columnas normalizadas de df.columns
+            cls.df_limpio = (
+                df.drop(  # Quita las columnas especificadas
+                    columns=[
+                        "lat",
+                        "lng",
+                        "imagen_1",
+                        "imagen_2",
+                        "imagen_3",
+                        "imagen_4",
+                        "beneficiarios",  # Nose si la sacaria
+                        "compromiso",
+                        "ba_elige",
+                        "link_interno",
+                        "pliego_descarga",
+                        "estudio_ambiental_descarga",
+                    ]
+                )
+                .drop_duplicates()  # Quita filas duplicadas
+                .assign(
+                    monto_contrato=df["monto_contrato"].str.strip()
+                )  # Assign agrega una nueva columna al df
+                .fillna(  # Rellena los valores nulos
+                    {
+                        "expediente_numero": 0,
+                        "destacada": "Desconocido",
+                        "contratacion_tipo": "Desconocida",
+                        "tipo": "Desconocido",
+                        "descripcion": "Desconocido",
+                        "barrio": "Desconocido",
+                        "direccion": "Desconocido",
+                        "licitacion_oferta_empresa": "Desconocido",
+                        "nro_contratacion": "Desconocido",
+                        "cuit_contratista": "Desconocido",
+                        "comuna": 0,
+                        "monto_contrato": 0,
+                        "fecha_inicio": 0,
+                        "fecha_fin_inicial": 0,
+                        "plazo_meses": 0,
+                        "licitacion_anio": 0,
+                        "mano_obra": 0,
+                        "financiamiento": "Desconocido",
+                        "etapa": "Desconocida",
+                        "porcentaje_avance": 0,
+                        "nombre": "Sin nombre",
+                        "tipo_obra": "Desconocido",
+                        "area_responsable": "Desconocida",
+                    }
+                )
             )
-        )
 
-        # 🟢 Normalizar valores de columna 'etapa'
-        cls.df_limpio["etapa"] = cls.df_limpio["etapa"].str.capitalize().str.strip()
-        cls.df_limpio["etapa"] = cls.df_limpio["etapa"].fillna("Desconocida")
-        cls.df_limpio["etapa"] = cls.df_limpio["etapa"].replace("", "Desconocida")
-        cls.df_limpio["etapa"] = (
-            cls.df_limpio["etapa"].str.strip().replace("", "Desconocida")
-        )
+            # 🟢 Normalizar valores de columna 'etapa'
+            cls.df_limpio["etapa"] = cls.df_limpio["etapa"].str.capitalize().str.strip()
+            cls.df_limpio["etapa"] = cls.df_limpio["etapa"].fillna("Desconocida")
+            cls.df_limpio["etapa"] = cls.df_limpio["etapa"].replace("", "Desconocida")
+            cls.df_limpio["etapa"] = (
+                cls.df_limpio["etapa"].str.strip().replace("", "Desconocida")
+            )
 
-        # 🟢 Normalizar valores de columna  'direccion'
-        cls.df_limpio = cls.df_limpio.drop_duplicates()
+            # 🟢 Normalizar valores de columna  'direccion'
+            cls.df_limpio = cls.df_limpio.drop_duplicates()
 
-        cls.df_limpio.to_csv(
-            "datos_limpios.csv", index=False
-        )  # Aca creamos csv con datos limpios.
-        # print("df df_limpio: ", df_limpio["monto_contrato"])
-        return cls.df_limpio
+            cls.df_limpio.to_csv(
+                "datos_limpios.csv", index=False
+            )  # Aca creamos csv con datos limpios.
+            # print("df df_limpio: ", df_limpio["monto_contrato"])
+            return cls.df_limpio
+        except Exception as e:
+            print("[ERROR] limpiar_datos - Error al limpiar_datos", e)
 
+    # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”)
     @classmethod
     def cargar_datos(cls, df_limpio):
-        GestionarObra.conectar_db()
+        GestionarObra.conectar_db("cargar_datos")
         try:
             print("[MÉTODO] cargar_datos")
             for index, row in df_limpio.iterrows():
@@ -162,12 +176,10 @@ class GestionarObra(ABC):
 
                 etapa_obj, booleano = Etapa.get_or_create(etapa=row["etapa"])
 
-                tipo_obj, booleano = TipoObra.get_or_create(
-                    tipo_obra=row["tipo"] or "Desconocido"
-                )
+                tipo_obj, booleano = TipoObra.get_or_create(tipo_obra=row["tipo"])
 
                 area_obj, booleano = AreaResponsable.get_or_create(
-                    area_responsable=row["area_responsable"] or "Desconocida"
+                    area_responsable=row["area_responsable"]
                 )
 
                 Obra.create(
@@ -178,7 +190,7 @@ class GestionarObra(ABC):
                     contratacion_tipo_fk=contratacion_obj,
                     area_responsable_fk=area_obj,
                     entorno=row["entorno"],
-                    nombre=row["nombre"] or "Sin nombre",
+                    nombre=row["nombre"],
                     descripcion=row["descripcion"],
                     monto_contrato=row["monto_contrato"],
                     fecha_inicio=row["fecha_inicio"],
@@ -192,10 +204,10 @@ class GestionarObra(ABC):
                     financiamiento=row["financiamiento"],
                 )
 
-            print("Datos cargados.")
-            print("Se realizó la carga de datos cargar_datos")
+            print("✅ Datos cargados.")
+            print("✨ Se realizó la carga de datos cargar_datos")
         except Exception as e:
-            print("Error al cargar_datos", e)
+            print("[ERROR] cargar_datos - Error al cargar_datos", e)
 
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
     @classmethod
@@ -263,7 +275,9 @@ class GestionarObra(ABC):
             entorno = input("Ingrese el entorno: ").strip()
             monto_contrato = input("Ingrese el  monto del contrato: ").strip()
             while True:
-                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ").strip()
+                fecha_inicio = input(
+                    "Ingrese la fecha de inicio (YYYY-MM-DD): "
+                ).strip()
                 try:
                     fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
                     break
@@ -271,7 +285,9 @@ class GestionarObra(ABC):
                     print("Formato de fecha incorrecto. Use YYYY-MM-DD.")
 
             while True:
-                fecha_fin_inicial = input("Ingrese la fecha de finalización (YYYY-MM-DD): ").strip()
+                fecha_fin_inicial = input(
+                    "Ingrese la fecha de finalización (YYYY-MM-DD): "
+                ).strip()
                 try:
                     fecha_fin_inicial = datetime.strptime
                     (fecha_fin_inicial, "%Y-%m-%d").date()
@@ -317,63 +333,77 @@ class GestionarObra(ABC):
             print(f"[ERROR] - No se pudo crear la nueva Obra: {e}")
             return None
 
-
     @classmethod
-    def obtener_indicadores(cls): #devuelve un dicionario con indicadores basados en las obras almacenadas en la base SQLite usando Peewee ORM
+    def obtener_indicadores(
+        cls,
+    ):  # devuelve un dicionario con indicadores basados en las obras almacenadas en la base SQLite usando Peewee ORM
         try:
-            cls.conectar_db() #abre conexion
+            cls.conectar_db()  # abre conexion
 
-            indicadores = {} #se crea diccionario con las consultas ORM Peewee
+            indicadores = {}  # se crea diccionario con las consultas ORM Peewee
 
-            #total de obras, cuenta todos los registros en Obra
+            # total de obras, cuenta todos los registros en Obra
             indicadores["total_obras"] = Obra.select().count()
 
-            #obras por etapa
+            # obras por etapa
             query_etapa = (
-                    Obra
-                    .select(Etapa.etapa.alias("etapa"),fn.COUNT(Obra.id).alias("cantidad"))
-                    .join(Etapa, on=(Obra.etapa_fk == Etapa.id)) #une la tabla Obra con Etapa por la FK 
-                    .group_by(Etapa.etapa) #agrupa por el nombre de la etapa
-                ) #resultado: filas con etapa y cantidad
-            indicadores["obras_por_etapa"] = [    
-                {"etapa": r.etapa,"cantidad": r.cantidad} for r in query_etapa
-            ]
-            #obras por tipo de obra
-            query_tipo = (
-                    Obra
-                    .select(TipoObra.tipo_obra.alias("tipo"), fn.COUNT(Obra.id).alias("cantidad"))
-                    .join(TipoObra, on=(Obra.tipo_obra_fk == TipoObra.id))
-                    .group_by(TipoObra.tipo_obra)
+                Obra.select(
+                    Etapa.etapa.alias("etapa"), fn.COUNT(Obra.id).alias("cantidad")
                 )
+                .join(
+                    Etapa, on=(Obra.etapa_fk == Etapa.id)
+                )  # une la tabla Obra con Etapa por la FK
+                .group_by(Etapa.etapa)  # agrupa por el nombre de la etapa
+            )  # resultado: filas con etapa y cantidad
+            indicadores["obras_por_etapa"] = [
+                {"etapa": r.etapa, "cantidad": r.cantidad} for r in query_etapa
+            ]
+            # obras por tipo de obra
+            query_tipo = (
+                Obra.select(
+                    TipoObra.tipo_obra.alias("tipo"),
+                    fn.COUNT(Obra.id).alias("cantidad"),
+                )
+                .join(TipoObra, on=(Obra.tipo_obra_fk == TipoObra.id))
+                .group_by(TipoObra.tipo_obra)
+            )
             indicadores["obras_por_tipo"] = [
                 {"tipo": r.tipo, "cantidad": r.cantidad} for r in query_tipo
             ]
-            #obras por comuna
+            # obras por comuna
             query_comuna = (
-                    Obra
-                    .select(Ubicacion.comuna.alias("comuna"), fn.COUNT(Obra.id).alias("cantidad"))
-                    .join(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
-                    .group_by(Ubicacion.comuna)
+                Obra.select(
+                    Ubicacion.comuna.alias("comuna"),
+                    fn.COUNT(Obra.id).alias("cantidad"),
                 )
+                .join(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
+                .group_by(Ubicacion.comuna)
+            )
             indicadores["obras_por_comuna"] = [
                 {"comuna": r.comuna, "cantidad": r.cantidad} for r in query_comuna
             ]
-            #monto total adjudicado
+            # monto total adjudicado
             monto_total = Obra.select(fn.SUM(Obra.monto_contrato)).scalar()
-            indicadores["monto_total"] = int(monto_total or 0)#suma todos los monto_contrato, .scalar devuelve el valor o None si no hay registros
+            indicadores["monto_total"] = int(
+                monto_total or 0
+            )  # suma todos los monto_contrato, .scalar devuelve el valor o None si no hay registros
 
-            #avance promedio
+            # avance promedio
             avance_promedio = Obra.select(fn.AVG(Obra.porcentaje_avance)).scalar()
-            indicadores["avance_promedio"] = float(avance_promedio or 0) #devuelve promedio
+            indicadores["avance_promedio"] = float(
+                avance_promedio or 0
+            )  # devuelve promedio
 
-            #obras destacadas
+            # obras destacadas
             obras_destacadas = Obra.select().where(Obra.destacada == "SI").count()
             indicadores["obras_destacadas"] = obras_destacadas
 
-            #top 5 barrios con mas obras desde Ubicacion.barrio
+            # top 5 barrios con mas obras desde Ubicacion.barrio
             query_barrios = (
-                Obra
-                .select(Ubicacion.barrio.alias("barrio"), fn.COUNT(Obra.id).alias("cantidad"))
+                Obra.select(
+                    Ubicacion.barrio.alias("barrio"),
+                    fn.COUNT(Obra.id).alias("cantidad"),
+                )
                 .JOIN(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
                 .order_by(fn.COUNT(Obra.id).desc())
                 .limit(5)
@@ -382,25 +412,29 @@ class GestionarObra(ABC):
                 {"barrio": r.barrio, "cantidad": r.cantidad} for r in query_barrios
             ]
 
-            #obras por area responsable
+            # obras por area responsable
             query_area = (
-                    Obra
-                    .select(AreaResponsable.area_responsable.alias("area"), fn.COUNT(Obra.id).alias("cantidad"))
-                    .join(AreaResponsable, on=(Obra.area_responsable_fk == AreaResponsable.id))
-                    .group_by(AreaResponsable.area_responsable)
+                Obra.select(
+                    AreaResponsable.area_responsable.alias("area"),
+                    fn.COUNT(Obra.id).alias("cantidad"),
                 )
+                .join(
+                    AreaResponsable, on=(Obra.area_responsable_fk == AreaResponsable.id)
+                )
+                .group_by(AreaResponsable.area_responsable)
+            )
             indicadores["obras_por_area"] = [
                 {"area": r.area, "cantidad": r.cantidad} for r in query_area
             ]
-            
-            #devuelve diccionario 
+
+            # devuelve diccionario
             return indicadores
-        
+
         except Exception as e:
             print(f"[ERROR] al obtener indicadores: {e}")
-            return None 
-        
-        #se cierra conexion
+            return None
+
+        # se cierra conexion
         finally:
             try:
                 cls.desconectar_db()
@@ -434,10 +468,10 @@ class GestionarObra(ABC):
         return rtado
 
 
-# GestionarObra.extraer_datos()
-# GestionarObra.limpiar_datos()
-# GestionarObra.mapear_orm()
-# GestionarObra.cargar_datos(GestionarObra.df_limpio)
+GestionarObra.extraer_datos()
+GestionarObra.limpiar_datos()
+GestionarObra.mapear_orm()
+GestionarObra.cargar_datos(GestionarObra.df_limpio)
 
 # GestionarObra.nueva_obra()
 
@@ -451,11 +485,11 @@ class GestionarObra(ABC):
 # GestionarObra.obtener_campos_unicos(Contratacion, "contratacion_tipo")
 # GestionarObra.obtener_campos_unicos(Obra, "monto_contrato")
 
-obra = Obra.get_by_id(1)
-obra.nuevo_proyecto("Rescindida")
-obra.iniciar_contratacion()
-obra.adjudicar_obra("Empresa SA", "30-12345678-9")
-obra.iniciar_obra(date(2025, 1, 3), date(2025, 12, 20))
-obra.actualizar_porcentaje_avance(40)
-obra.incrementar_plazo(2)
-obra.finalizar_obra()
+# obra = Obra.get_by_id(1)
+# obra.nuevo_proyecto("Rescindida")
+# obra.iniciar_contratacion()
+# obra.adjudicar_obra("Empresa SA", "30-12345678-9")
+# obra.iniciar_obra(date(2025, 1, 3), date(2025, 12, 20))
+# obra.actualizar_porcentaje_avance(40)
+# obra.incrementar_plazo(2)
+# obra.finalizar_obra()
