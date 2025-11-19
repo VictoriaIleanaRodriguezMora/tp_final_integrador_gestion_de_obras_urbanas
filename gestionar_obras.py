@@ -4,7 +4,15 @@ from peewee import *
 from modelo_orm import *
 import sqlite3
 from modelo_orm import sqlite_db
+from datetime import *
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+CVS_PATH = os.getenv("CVS_PATH")
+
+from datetime import *
 
 class GestionarObra(ABC):
     df_limpio = []
@@ -14,17 +22,12 @@ class GestionarObra(ABC):
     def extraer_datos(cls):
         try:
             # print('extraer_datos')
-            df = pd.read_csv(
-                "observatorio-de-obras-urbanas.csv", sep=";", encoding="latin1"
-            )
+            df = pd.read_csv(CVS_PATH, sep=";", encoding="utf-8")
             # print(df)
             return df
 
         except FileNotFoundError as e:
             print("No se ha encontrado el archivo csv", e)
-
-    #  else:
-    #      return df
 
     # sentencias necesarias para realizar la conexión a la base de datos “obras_urbanas.db”.
     @classmethod
@@ -49,7 +52,7 @@ class GestionarObra(ABC):
     @classmethod
     # 🟡 Agregar manejo de errores
     def mapear_orm(cls):
-        print("mapear_orm")
+        print("[MÉTODO] mapear_orm")
         GestionarObra.conectar_db()
         sqlite_db.create_tables(  # db no existe
             [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
@@ -60,7 +63,7 @@ class GestionarObra(ABC):
     @classmethod
     # 🟡 Agregar manejo de errores
     def limpiar_datos(cls):
-        print("limpiar_datos")
+        print("[MÉTODO] limpiar_datos")
         df = cls.extraer_datos()
         # print("df obtenido: ", df)
 
@@ -130,8 +133,6 @@ class GestionarObra(ABC):
         )
 
         # 🟢 Normalizar valores de columna  'direccion'
-        # cls.df_limpio = cls.df_limpio.drop_duplicates(subset=["direccion"])
-
         cls.df_limpio = cls.df_limpio.drop_duplicates()
 
         cls.df_limpio.to_csv(
@@ -144,15 +145,13 @@ class GestionarObra(ABC):
     def cargar_datos(cls, df_limpio):
         GestionarObra.conectar_db()
         try:
-            print("cargar_datos")
+            print("[MÉTODO] cargar_datos")
             for index, row in df_limpio.iterrows():
                 # SÍ ANDA 🔽
                 ubicacion_obj, booleano = Ubicacion.get_or_create(
                     comuna=row["comuna"],
                     barrio=row["barrio"],
                     direccion=row["direccion"],
-                    # nombre_calle=row["nombre_calle"],
-                    # altura=row["altura"],
                 )
 
                 contratacion_obj, booleano = Contratacion.get_or_create(
@@ -200,18 +199,16 @@ class GestionarObra(ABC):
 
     # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
     @classmethod
-    # 🟡 Agregar manejo de errores
-    def nueva_obra(
-        cls,
-    ):
+    def nueva_obra(cls):
         try:
+            print("[MÉTODO] nueva_obra")
             # Area responsable
             while True:
                 area_nombre = input("Ingrese el área responsable: ").strip()
-                nva_area_responsable = AreaResponsable.get_or_none(
+                nueva_area_responsable = AreaResponsable.get_or_none(
                     area_responsable=area_nombre
                 )
-                if nva_area_responsable:
+                if nueva_area_responsable:
                     break
                 print("Area no encontrada, intente nuevamente.")
 
@@ -219,13 +216,13 @@ class GestionarObra(ABC):
             while True:
                 contratacion_nombre = input("Ingrese número de contratación: ").strip()
                 tipo_contratacion = input("Ingrese tipo de contratación: ").strip()
-                nvo_cuit = input("Ingrese cuit: ").strip()
-                nva_contratacion = Contratacion.get_or_none(
+                nuevo_cuit = input("Ingrese cuit: ").strip()
+                nueva_contratacion = Contratacion.get_or_none(
                     nro_contratacion=contratacion_nombre,
                     contratacion_tipo=tipo_contratacion,
-                    cuit_contratista=nvo_cuit,
+                    cuit_contratista=nuevo_cuit,
                 )
-                if nva_contratacion:
+                if nueva_contratacion:
                     break
                 print("Contratación no encontrada, intente nuevamente.")
 
@@ -249,11 +246,13 @@ class GestionarObra(ABC):
             while True:
                 comuna_nombre = input("Ingrese la comuna: ").strip()
                 barrio_nombre = input("Ingrese el barrio: ").strip()
-                nva_direccion = input("Ingrese la dirección: ").strip()
-                nva_ubicacion = Ubicacion.get_or_none(
-                    comuna=comuna_nombre, barrio=barrio_nombre, direccion=nva_direccion
+                nueva_direccion = input("Ingrese la dirección: ").strip()
+                nueva_ubicacion = Ubicacion.get_or_none(
+                    comuna=comuna_nombre,
+                    barrio=barrio_nombre,
+                    direccion=nueva_direccion,
                 )
-                if nva_ubicacion:
+                if nueva_ubicacion:
                     break
                 print("Ubicación no encontrada, intente nuevamente.")
 
@@ -264,9 +263,7 @@ class GestionarObra(ABC):
             entorno = input("Ingrese el entorno: ").strip()
             monto_contrato = input("Ingrese el  monto del contrato: ").strip()
             while True:
-                fecha_inicio = input(
-                    "Ingrese la fecha de inicio (YYYY-MM-DD): "
-                ).strip()
+                fecha_inicio = input("Ingrese la fecha de inicio (YYYY-MM-DD): ").strip()
                 try:
                     fecha_inicio = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
                     break
@@ -274,13 +271,10 @@ class GestionarObra(ABC):
                     print("Formato de fecha incorrecto. Use YYYY-MM-DD.")
 
             while True:
-                fecha_fin_inicial = input(
-                    "Ingrese la fecha de finalización (YYYY-MM-DD): "
-                ).strip()
+                fecha_fin_inicial = input("Ingrese la fecha de finalización (YYYY-MM-DD): ").strip()
                 try:
-                    fecha_fin_inicial = datetime.strptime(
-                        fecha_fin_inicial, "%Y-%m-%d"
-                    ).date()
+                    fecha_fin_inicial = datetime.strptime
+                    (fecha_fin_inicial, "%Y-%m-%d").date()
                     break
                 except ValueError:
                     print("Formato de fecha incorrecto. Use YYYY-MM-DD.")
@@ -294,11 +288,11 @@ class GestionarObra(ABC):
             financiamiento = input("Ingrese su financiamiento: ").strip()
 
             nueva_obra = Obra(
-                area_responsable_fk=nva_area_responsable,
-                contratacion_tipo_fk=nva_contratacion,
+                area_responsable_fk=nueva_area_responsable,
+                contratacion_tipo_fk=nueva_contratacion,
                 etapa_fk=nva_etapa,
                 tipo_obra_fk=nvo_tipo,
-                ubicacion_fk=nva_ubicacion,
+                ubicacion_fk=nueva_ubicacion,
                 nombre=nombre,
                 descripcion=descripcion,
                 expediente_numero=expediente_numero,
@@ -316,7 +310,7 @@ class GestionarObra(ABC):
             )
 
             nueva_obra.save()
-            print(f"Obra '{nueva_obra.nombre}' creada exitosamente.")
+            print(f"[GUARDADO] Obra '{nueva_obra.nombre}' creada exitosamente.")
             return nueva_obra
 
         except Exception as e:
@@ -413,10 +407,55 @@ class GestionarObra(ABC):
             except Exception:
                 pass
 
+    @classmethod
 
-GestionarObra.extraer_datos()
-GestionarObra.limpiar_datos()
-GestionarObra.mapear_orm()
-GestionarObra.cargar_datos(GestionarObra.df_limpio)
+    # Ver los campos únicos de cada tabla
+    def obtener_campos_unicos(cls, modelo, columna):
+        print("[MÉTODO] obtener_campos_unicos")
+        # Devuelve los valores únicos de la columna que se le dice
+        # Validar que el modelo sea un modelo Peewee
+        if not hasattr(modelo, "_meta"):
+            raise TypeError(f"[raise] {modelo.__name__} no es un modelo Peewee válido.")
 
-GestionarObra.nueva_obra()
+        # Validar que la columna exista
+        if columna not in modelo._meta.fields:
+            raise ValueError(
+                f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
+            )
+
+        campo = modelo._meta.fields[columna]
+
+        # SELECT DISTINCT columna. UNIQUE de pandas
+        consulta = modelo.select(campo).distinct().tuples()
+
+        # Valor es (3,) valor[0] es 3
+        rtado = [valor[0] for valor in consulta]
+        print(rtado)
+        return rtado
+
+
+# GestionarObra.extraer_datos()
+# GestionarObra.limpiar_datos()
+# GestionarObra.mapear_orm()
+# GestionarObra.cargar_datos(GestionarObra.df_limpio)
+
+# GestionarObra.nueva_obra()
+
+# print(f"Obra seleccionada: ", obra)
+# print("Obra completa:", obra.__data__)
+
+# Ver los campos únicos de cada tabla
+# GestionarObra.obtener_campos_unicos(Etapa, "etapa")
+# GestionarObra.obtener_campos_unicos(AreaResponsable, "area_responsable")
+# GestionarObra.obtener_campos_unicos(Ubicacion, "direccion")
+# GestionarObra.obtener_campos_unicos(Contratacion, "contratacion_tipo")
+# GestionarObra.obtener_campos_unicos(Obra, "monto_contrato")
+
+obra = Obra.get_by_id(1)
+obra.nuevo_proyecto("Rescindida")
+obra.iniciar_contratacion()
+obra.adjudicar_obra("Empresa SA", "30-12345678-9")
+obra.iniciar_obra(date(2025, 1, 3), date(2025, 12, 20))
+obra.actualizar_porcentaje_avance(40)
+obra.incrementar_plazo(2)
+obra.finalizar_obra()
