@@ -33,7 +33,7 @@ ERRORES
 | Monto del contrato     | $67.065.700,00                                                               |
 | Comuna                 | 12                                                                           |
 | Barrio                 | Villa Urquiza                                                                |
-| Dirección              | Rivera, Pedro I., Dr. 4221                                                   |
+| Dirección              | RIVERA, PEDRO I., DR. 4221                                                   |
 | Fecha de inicio        | 1/12/2013                                                                    |
 | Fecha de finalización  | 31/5/2016                                                                    |
 | Plazo en meses         | 29                                                                           |

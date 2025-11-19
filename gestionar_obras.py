@@ -504,12 +504,12 @@ class GestionarObra(ABC):
         return rtado
 
 
-GestionarObra.extraer_datos()
-GestionarObra.limpiar_datos()
-GestionarObra.mapear_orm()
-GestionarObra.cargar_datos(GestionarObra.df_limpio)
+# GestionarObra.extraer_datos()
+# GestionarObra.limpiar_datos()
+# GestionarObra.mapear_orm()
+# GestionarObra.cargar_datos(GestionarObra.df_limpio)
 
-#GestionarObra.nueva_obra()
+GestionarObra.nueva_obra()
 
 # print(f"Obra seleccionada: ", obra)
 # print("Obra completa:", obra.__data__)
