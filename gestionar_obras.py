@@ -57,7 +57,7 @@ class GestionarObra(ABC):
         sqlite_db.create_tables(  # db no existe
             [Etapa, TipoObra, AreaResponsable, Ubicacion, Contratacion, Obra]
         )
-        GestionarObra.conectar_db()
+        GestionarObra.desconectar_db()
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
     @classmethod
@@ -316,6 +316,96 @@ class GestionarObra(ABC):
         except Exception as e:
             print(f"[ERROR] - No se pudo crear la nueva Obra: {e}")
             return None
+
+
+    @classmethod
+    def obtener_indicadores(cls): #devuelve un dicionario con indicadores basados en las obras almacenadas en la base SQLite usando Peewee ORM
+        try:
+            cls.conectar_db() #abre conexion
+
+            indicadores = {} #se crea diccionario con las consultas ORM Peewee
+
+            #total de obras, cuenta todos los registros en Obra
+            indicadores["total_obras"] = Obra.select().count()
+
+            #obras por etapa
+            query_etapa = (
+                    Obra
+                    .select(Etapa.etapa.alias("etapa"),fn.COUNT(Obra.id).alias("cantidad"))
+                    .join(Etapa, on=(Obra.etapa_fk == Etapa.id)) #une la tabla Obra con Etapa por la FK 
+                    .group_by(Etapa.etapa) #agrupa por el nombre de la etapa
+                ) #resultado: filas con etapa y cantidad
+            indicadores["obras_por_etapa"] = [    
+                {"etapa": r.etapa,"cantidad": r.cantidad} for r in query_etapa
+            ]
+            #obras por tipo de obra
+            query_tipo = (
+                    Obra
+                    .select(TipoObra.tipo_obra.alias("tipo"), fn.COUNT(Obra.id).alias("cantidad"))
+                    .join(TipoObra, on=(Obra.tipo_obra_fk == TipoObra.id))
+                    .group_by(TipoObra.tipo_obra)
+                )
+            indicadores["obras_por_tipo"] = [
+                {"tipo": r.tipo, "cantidad": r.cantidad} for r in query_tipo
+            ]
+            #obras por comuna
+            query_comuna = (
+                    Obra
+                    .select(Ubicacion.comuna.alias("comuna"), fn.COUNT(Obra.id).alias("cantidad"))
+                    .join(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
+                    .group_by(Ubicacion.comuna)
+                )
+            indicadores["obras_por_comuna"] = [
+                {"comuna": r.comuna, "cantidad": r.cantidad} for r in query_comuna
+            ]
+            #monto total adjudicado
+            monto_total = Obra.select(fn.SUM(Obra.monto_contrato)).scalar()
+            indicadores["monto_total"] = int(monto_total or 0)#suma todos los monto_contrato, .scalar devuelve el valor o None si no hay registros
+
+            #avance promedio
+            avance_promedio = Obra.select(fn.AVG(Obra.porcentaje_avance)).scalar()
+            indicadores["avance_promedio"] = float(avance_promedio or 0) #devuelve promedio
+
+            #obras destacadas
+            obras_destacadas = Obra.select().where(Obra.destacada == "SI").count()
+            indicadores["obras_destacadas"] = obras_destacadas
+
+            #top 5 barrios con mas obras desde Ubicacion.barrio
+            query_barrios = (
+                Obra
+                .select(Ubicacion.barrio.alias("barrio"), fn.COUNT(Obra.id).alias("cantidad"))
+                .JOIN(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
+                .order_by(fn.COUNT(Obra.id).desc())
+                .limit(5)
+            )
+            indicadores["top5_barrios"] = [
+                {"barrio": r.barrio, "cantidad": r.cantidad} for r in query_barrios
+            ]
+
+            #obras por area responsable
+            query_area = (
+                    Obra
+                    .select(AreaResponsable.area_responsable.alias("area"), fn.COUNT(Obra.id).alias("cantidad"))
+                    .join(AreaResponsable, on=(Obra.area_responsable_fk == AreaResponsable.id))
+                    .group_by(AreaResponsable.area_responsable)
+                )
+            indicadores["obras_por_area"] = [
+                {"area": r.area, "cantidad": r.cantidad} for r in query_area
+            ]
+            
+            #devuelve diccionario 
+            return indicadores
+        
+        except Exception as e:
+            print(f"[ERROR] al obtener indicadores: {e}")
+            return None 
+        
+        #se cierra conexion
+        finally:
+            try:
+                cls.desconectar_db()
+            except Exception:
+                pass
 
     @classmethod
 
