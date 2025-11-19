@@ -33,15 +33,19 @@ class BaseModel(Model):
 
 class Etapa(BaseModel):
     etapa = CharField(unique=True, null=False)
+    class Meta:
+        table_name = "Etapa"
 
 
 class TipoObra(BaseModel):
     tipo_obra = CharField(unique=True, null=False)
-
+    class Meta:
+        table_name = "TipoObra"
 
 class AreaResponsable(BaseModel):
     area_responsable = CharField(unique=True, null=False)
-
+    class Meta:
+            table_name = "AreaResponsable"
 
 class Ubicacion(BaseModel):
     comuna = IntegerField()  # No sé si la comuna es la mejor opcion para ID
@@ -51,6 +55,7 @@ class Ubicacion(BaseModel):
     direccion = CharField()
 
     class Meta:
+        table_name = "Ubicacion"
         constraints = [SQL("UNIQUE(comuna, barrio, direccion)")]
 
 
@@ -58,10 +63,8 @@ class Contratacion(BaseModel):
     contratacion_tipo = CharField()
     nro_contratacion = CharField()
     cuit_contratista = CharField()
-
     class Meta:
-        constraints = [SQL("UNIQUE(contratacion_tipo, nro_contratacion)")]
-
+            table_name = "Contratacion"
 
 class Obra(BaseModel):
     etapa_fk = ForeignKeyField(Etapa)  # FK
@@ -82,7 +85,10 @@ class Obra(BaseModel):
     mano_obra = IntegerField()
     destacada = CharField()
     expediente_numero = CharField()
-    financiamiento = CharField(unique=True)  #
+    financiamiento = CharField()  
+
+    class Meta:
+        table_name = "Obra"
 
     # ❗ Son acciones de una obra ya existente
     # “Tengo una obra creada en la BD → aplico una acción → guardo cambios”.

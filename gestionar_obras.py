@@ -144,7 +144,11 @@ class GestionarObra(ABC):
             )
 
             # 🟢 Normalizar valores de columna  'direccion'
+            cls.df_limpio["direccion"] = cls.df_limpio["direccion"].str.upper()
+
+            # 🟢 Quitar valores duplicados
             cls.df_limpio = cls.df_limpio.drop_duplicates()
+
 
             cls.df_limpio.to_csv(
                 "datos_limpios.csv", index=False
@@ -246,7 +250,7 @@ class GestionarObra(ABC):
                     break
                 print("Etapa no encontrada, intente nuevamente.")
 
-                # Tipo de obra
+            # Tipo de obra
             while True:
                 tipo_nombre = input("Ingrese el tipo de obra: ").strip()
                 nvo_tipo = TipoObra.get_or_none(tipo_obra=tipo_nombre)
@@ -254,7 +258,7 @@ class GestionarObra(ABC):
                     break
                 print("Etapa no encontrada, intente nuevamente.")
 
-                # Ubicación
+            # Ubicación
             while True:
                 comuna_nombre = input("Ingrese la comuna: ").strip()
                 barrio_nombre = input("Ingrese el barrio: ").strip()
@@ -274,6 +278,7 @@ class GestionarObra(ABC):
             expediente_numero = input("Ingrese número de expediente: ").strip()
             entorno = input("Ingrese el entorno: ").strip()
             monto_contrato = input("Ingrese el  monto del contrato: ").strip()
+
             while True:
                 fecha_inicio = input(
                     "Ingrese la fecha de inicio (YYYY-MM-DD): "
@@ -325,12 +330,44 @@ class GestionarObra(ABC):
                 financiamiento=financiamiento,
             )
 
+            obj_sin_ids = {
+                "nombre": nombre,
+                "descripcion": descripcion,
+                "expediente_numero": expediente_numero,
+                "entorno": entorno,
+                "monto_contrato": monto_contrato,
+                "fecha_inicio": fecha_inicio,
+                "fecha_fin_inicial": fecha_fin_inicial,
+                "plazo_meses": plazo_meses,
+                "porcentaje_avance": porcentaje_avance,
+                "licitacion_oferta_empresa": licitacion_oferta_empresa,
+                "licitacion_anio": licitacion_anio,
+                "mano_obra": mano_obra,
+                "destacada": destacada,
+                "financiamiento": financiamiento,
+                # Mostramos las FK sin ids, para que sea más amigable
+                "area_responsable": nueva_area_responsable.area_responsable,
+                "contratacion": {
+                    "tipo": nueva_contratacion.contratacion_tipo,
+                    "nro": nueva_contratacion.nro_contratacion,
+                    "cuit": nueva_contratacion.cuit_contratista,
+                },
+                "etapa": nva_etapa.etapa,
+                "tipo_obra": nvo_tipo.tipo_obra,
+                "ubicacion": {
+                    "comuna": nueva_ubicacion.comuna,
+                    "barrio": nueva_ubicacion.barrio,
+                    "direccion": nueva_ubicacion.direccion,
+                },
+            }
+
             nueva_obra.save()
-            print(f"[GUARDADO] Obra '{nueva_obra.nombre}' creada exitosamente.")
+            print(f"[GUARDADO] - Obra '{nueva_obra.nombre}' creada exitosamente.")
+            print(f"[GUARDADO] - {obj_sin_ids}")
             return nueva_obra
 
         except Exception as e:
-            print(f"[ERROR] - No se pudo crear la nueva Obra: {e}")
+            print(f"[ERROR] nueva_obra - No se pudo crear la nueva Obra: {e}")
             return None
 
     @classmethod
@@ -434,15 +471,14 @@ class GestionarObra(ABC):
             print(f"[ERROR] al obtener indicadores: {e}")
             return None
 
-        # se cierra conexion
         finally:
             try:
                 cls.desconectar_db()
             except Exception:
                 pass
 
-    @classmethod
 
+    @classmethod
     # Ver los campos únicos de cada tabla
     def obtener_campos_unicos(cls, modelo, columna):
         print("[MÉTODO] obtener_campos_unicos")
@@ -473,7 +509,7 @@ GestionarObra.limpiar_datos()
 GestionarObra.mapear_orm()
 GestionarObra.cargar_datos(GestionarObra.df_limpio)
 
-# GestionarObra.nueva_obra()
+#GestionarObra.nueva_obra()
 
 # print(f"Obra seleccionada: ", obra)
 # print("Obra completa:", obra.__data__)
