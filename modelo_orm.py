@@ -59,10 +59,9 @@ class Ubicacion(BaseModel):
         db_table = "Ubicacion"
 
 
-# no estoy seguro si dejar este asi o hacerlo parte de la tabla obra
 class Contratacion(BaseModel):
-    nro_contratacion = CharField()
     contratacion_tipo = CharField()
+    nro_contratacion = CharField()
     cuit_contratista = CharField()
 
     class Meta:
@@ -70,7 +69,6 @@ class Contratacion(BaseModel):
 
 
 class Obra(BaseModel):
-    expediente_numero = CharField()
     etapa_fk = ForeignKeyField(Etapa)  # FK
     ubicacion_fk = ForeignKeyField(Ubicacion)  # FK
     tipo_obra_fk = ForeignKeyField(TipoObra)  # FK
@@ -88,6 +86,7 @@ class Obra(BaseModel):
     licitacion_anio = CharField(null=True)
     mano_obra = IntegerField()
     destacada = CharField()
+    expediente_numero = CharField()
     financiamiento = CharField()  #
 
     class Meta:
@@ -127,27 +126,114 @@ class Obra(BaseModel):
 
     # Debe modificar el tipo de contratacion de la obra
     def iniciar_contratacion(self):
-        pass
+        try:
+            iniciar_contratacion = input("Ingrese un tipo de contratación existente: ").strip()
+            nuevo_tipo_contratacion = Contratacion.get_or_none(contratacion_tipo=iniciar_contratacion)
+            if not nuevo_tipo_contratacion:
+                raise ValueError("El tipo de contratación ingresado no existe en la base de datos")
+        except Exception as e:
+            print(f"[ERROR] - al buscar el Tipo de Contratación': {e}")
+
+        try:
+            nuevo_nro_contratacion = input("Ingrese un número de contratación: ").strip()
+            if not nuevo_nro_contratacion:
+                raise ValueError("El número de contratación no es válido")
+        except Exception as e:
+            print(f"[ERROR] - al ingresar un número de contratación': {e}")
+        
+        try:
+            self.contratacion_tipo_fk.contratacion_tipo = nuevo_tipo_contratacion
+            self.contratacion_tipo_fk.nro_contratacion = nuevo_nro_contratacion
+            self.contratacion_tipo_fk.save()
+            self.save()
+            print("Obra completa después de los cambios:", self.__data__)
+        except Exception as e:
+            print(f"[ERROR] - al guardar el tipo y número de contratación': {e}")
+            return False
 
     # Debe pedir: nombre, cuit de la empresa que ajudicará una obra. Y número de expediente
     def adjudicar_obra(self):
-        pass
+        try:
+            nombre_empresa = input("Ingrese el nombre de la empresa adjudicataria: ").strip()
+            cuit_empresa = input("Ingrese el CUIT de la empresa adjudicataria: ").strip()
 
+            contratacion_existente = Contratacion.get_or_none(
+            Contratacion.cuit_contratista == cuit_empresa
+            )
+
+            if not contratacion_existente:
+                raise ValueError("No existe una contratación con ese CUIT en la base de datos.")
+
+            nro_expediente = input("Ingrese número de expediente: ").strip()
+        
+            self.licitacion_oferta_empresa = nombre_empresa       
+            self.expediente_numero = nro_expediente               
+            self.save()
+
+            print(f"[OK] La obra '{self.nombre}' fue adjudicada a {nombre_empresa} (CUIT {cuit_empresa}).")
+        
+        except Exception as e:
+         print("[ERROR en adjudicar_obra]", e)
+
+           
     # Debe pedir: nueva fecha de inicio, nueva fecha de fin inicial
     def iniciar_obra(self):
-        pass
+        try:
+            self.destacada = input("¿Es destacada? (SI/NO): ").strip()
+
+            fecha_ini = input("Fecha inicio (DD/MM/YYYY): ").strip()
+            fecha_fin = input("Fecha fin inicial (DD/MM/YYYY): ").strip()
+
+            self.fecha_inicio = fecha_ini
+            self.fecha_fin_inicial = fecha_fin
+
+            financiamiento = input("Fuente de financiamiento: ").strip()
+            self.financiamiento = financiamiento
+
+            self.mano_obra = int(input("Mano de obra inicial: "))
+
+            self.save()
+            print("[OK] Obra iniciada.")
+
+        except Exception as e:
+            print("[ERROR en iniciar_obra]", e)
 
     # Debe pedir: un número, el nuevo porcentaje a actualizar
     def actualizar_porcentaje_avance(self):
-        pass
+        try:
+            nuevo = int(input("Nuevo porcentaje de avance (0-100): "))
+
+            if not 0 <= nuevo <= 100:
+                raise ValueError("Debe estar entre 0 y 100.")
+
+            self.porcentaje_avance = nuevo
+            self.save()
+
+            print("[OK] Avance actualizado.")
+
+        except Exception as e:
+            print("[ERROR en actualizar_porcentaje_avance]", e)
 
     # Al invocar este método, el porcentaje de avance pasa a 100. Y la etapa = 'Finalizada'
     def finalizar_obra(self):
-        pass
+        try:
+            etapa_fin = Etapa.get_or_none(etapa="Finalizada")
+            self.etapa_fk = etapa_fin
+            self.porcentaje_avance = 100
+            self.save()
+            print("[OK] Obra finalizada.")
+        except Exception as e:
+            print("[ERROR en finalizar_obra]", e)
 
     # Al invocar este método la etapa =  'Rescindida'
     def rescindir_obra(self):
-        pass
+        try:
+            etapa_res = Etapa.get_or_none(etapa="Rescisión")
+            self.etapa_fk = etapa_res
+            self.save()
+            print("[OK] Obra rescindida.")
+        except Exception as e:
+            print("[ERROR en rescindir_obra]", e)
 
     # Opcionales
     def incrementar_plazo(self):
