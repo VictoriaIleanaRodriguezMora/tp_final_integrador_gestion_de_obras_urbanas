@@ -6,7 +6,8 @@
 
 # ❗ Todas las clases de este archivo, pueden (o deben) tener métodos dentro.
 
-from peewee import *
+# Sin el *: from pewee as pw
+from peewee import *  # Por el * no usamos pw.CharField
 import sqlite3
 
 import os
@@ -14,38 +15,32 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Creacion de la bdd
-sqlite_db = SqliteDatabase(os.getenv("DB_NAME"))
+
+# Creacion de la bdd vacía
+sqlite_db = SqliteDatabase(
+    os.getenv("DB_NAME")
+)  # Es un objeto al que me quiero referir en el futuro
 print(os.getenv("DB_NAME"))
 
 
-# Este es nuetro modelo normalizado. Basado en pewee
+# Este es nuetro modelo normalizado. Basado en pewee. El modelo son las tablas que tendrá la bdd
+# Las clases tienen que entender que pertenecen, representan una tabla que se va a crear en DB_NAME. Para eso, tiene que heredar de Model.
 class BaseModel(Model):
     class Meta:
+        # database, es una variable de pewee, al asignarle nuestra bdd. El modelo entiende que va a ser una bdd
         database = sqlite_db
 
 
 class Etapa(BaseModel):
     etapa = CharField(unique=True, null=False)
 
-    class Meta:
-        db_table = "Etapa"
-
 
 class TipoObra(BaseModel):
     tipo_obra = CharField(unique=True, null=False)
 
-    class Meta:
-        db_table = (
-            "TipoObra"  # Si no defino un nombre, toma por defecto el nombre de la clase
-        )
-
 
 class AreaResponsable(BaseModel):
     area_responsable = CharField(unique=True, null=False)
-
-    class Meta:
-        db_table = "AreaResponsable"
 
 
 class Ubicacion(BaseModel):
@@ -55,17 +50,11 @@ class Ubicacion(BaseModel):
     # altura = CharField()
     direccion = CharField()
 
-    class Meta:
-        db_table = "Ubicacion"
-
 
 class Contratacion(BaseModel):
     contratacion_tipo = CharField()
     nro_contratacion = CharField()
     cuit_contratista = CharField()
-
-    class Meta:
-        db_table = "Contratacion"
 
 
 class Obra(BaseModel):
@@ -88,9 +77,6 @@ class Obra(BaseModel):
     destacada = CharField()
     expediente_numero = CharField()
     financiamiento = CharField()  #
-
-    class Meta:
-        db_table = "Obra"
 
     # ❗ Son acciones de una obra ya existente
     # “Tengo una obra creada en la BD → aplico una acción → guardo cambios”.
@@ -127,20 +113,28 @@ class Obra(BaseModel):
     # Debe modificar el tipo de contratacion de la obra
     def iniciar_contratacion(self):
         try:
-            iniciar_contratacion = input("Ingrese un tipo de contratación existente: ").strip()
-            nuevo_tipo_contratacion = Contratacion.get_or_none(contratacion_tipo=iniciar_contratacion)
+            iniciar_contratacion = input(
+                "Ingrese un tipo de contratación existente: "
+            ).strip()
+            nuevo_tipo_contratacion = Contratacion.get_or_none(
+                contratacion_tipo=iniciar_contratacion
+            )
             if not nuevo_tipo_contratacion:
-                raise ValueError("El tipo de contratación ingresado no existe en la base de datos")
+                raise ValueError(
+                    "El tipo de contratación ingresado no existe en la base de datos"
+                )
         except Exception as e:
             print(f"[ERROR] - al buscar el Tipo de Contratación': {e}")
 
         try:
-            nuevo_nro_contratacion = input("Ingrese un número de contratación: ").strip()
+            nuevo_nro_contratacion = input(
+                "Ingrese un número de contratación: "
+            ).strip()
             if not nuevo_nro_contratacion:
                 raise ValueError("El número de contratación no es válido")
         except Exception as e:
             print(f"[ERROR] - al ingresar un número de contratación': {e}")
-        
+
         try:
             self.contratacion_tipo_fk.contratacion_tipo = nuevo_tipo_contratacion
             self.contratacion_tipo_fk.nro_contratacion = nuevo_nro_contratacion
@@ -154,28 +148,35 @@ class Obra(BaseModel):
     # Debe pedir: nombre, cuit de la empresa que ajudicará una obra. Y número de expediente
     def adjudicar_obra(self):
         try:
-            nombre_empresa = input("Ingrese el nombre de la empresa adjudicataria: ").strip()
-            cuit_empresa = input("Ingrese el CUIT de la empresa adjudicataria: ").strip()
+            nombre_empresa = input(
+                "Ingrese el nombre de la empresa adjudicataria: "
+            ).strip()
+            cuit_empresa = input(
+                "Ingrese el CUIT de la empresa adjudicataria: "
+            ).strip()
 
             contratacion_existente = Contratacion.get_or_none(
-            Contratacion.cuit_contratista == cuit_empresa
+                Contratacion.cuit_contratista == cuit_empresa
             )
 
             if not contratacion_existente:
-                raise ValueError("No existe una contratación con ese CUIT en la base de datos.")
+                raise ValueError(
+                    "No existe una contratación con ese CUIT en la base de datos."
+                )
 
             nro_expediente = input("Ingrese número de expediente: ").strip()
-        
-            self.licitacion_oferta_empresa = nombre_empresa       
-            self.expediente_numero = nro_expediente               
+
+            self.licitacion_oferta_empresa = nombre_empresa
+            self.expediente_numero = nro_expediente
             self.save()
 
-            print(f"[OK] La obra '{self.nombre}' fue adjudicada a {nombre_empresa} (CUIT {cuit_empresa}).")
-        
-        except Exception as e:
-         print("[ERROR en adjudicar_obra]", e)
+            print(
+                f"[OK] La obra '{self.nombre}' fue adjudicada a {nombre_empresa} (CUIT {cuit_empresa})."
+            )
 
-           
+        except Exception as e:
+            print("[ERROR en adjudicar_obra]", e)
+
     # Debe pedir: nueva fecha de inicio, nueva fecha de fin inicial
     def iniciar_obra(self):
         try:
