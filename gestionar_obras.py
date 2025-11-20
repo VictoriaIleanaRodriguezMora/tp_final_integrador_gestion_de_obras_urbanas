@@ -350,7 +350,7 @@ class GestionarObra(ABC):
         except Exception as e:
             print(f"[ERROR] nueva_obra - No se pudo crear la nueva Obra: {e}")
             return None
-
+    '''
     @classmethod
     def obtener_indicadores(cls):
         try:
@@ -442,6 +442,84 @@ class GestionarObra(ABC):
         except Exception as e:
             print(f"[ERROR] al obtener indicadores: {e}")
             return None
+    '''    
+    @classmethod
+    def obtener_indicadores(cls):
+        try:
+            cls.conectar_db("obtener_indicadores")
+
+            indicadores = {}
+
+            # a. Listado de todas las áreas responsables
+            indicadores["areas_responsables"] = [
+                a.area_responsable for a in AreaResponsable.select()
+            ]
+
+            # b. Listado de todos los tipos de obra
+            indicadores["tipos_obra"] = [
+                t.tipo_obra for t in TipoObra.select()
+            ]
+
+            # c. Cantidad de obras por etapa
+            indicadores["obras_por_etapa"] = list(
+                Obra.select(
+                    Etapa.etapa.alias("etapa"),
+                    fn.COUNT(Obra.id).alias("cantidad")
+                )
+                .join(Etapa)
+                .group_by(Etapa.etapa)
+                .dicts()
+            )
+
+            # d. Cantidad y monto total por tipo de obra
+            datos_tipo = []
+            for tipo in TipoObra.select():
+                cantidad = Obra.select().where(
+                    Obra.tipo_obra_fk == tipo
+                ).count()
+
+                monto = (
+                    Obra.select(fn.SUM(Obra.monto_contrato))
+                    .where(Obra.tipo_obra_fk == tipo)
+                    .scalar()
+                ) or 0
+
+                datos_tipo.append({
+                    "tipo": tipo.tipo_obra,
+                    "cantidad": cantidad,
+                    "monto_total": int(monto)
+                })
+
+            indicadores["datos_por_tipo"] = datos_tipo
+
+            # e. Barrios de comunas 1, 2 y 3
+            indicadores["barrios_123"] = list(
+                Ubicacion.select(Ubicacion.comuna, Ubicacion.barrio)
+                .where(Ubicacion.comuna.in_([1, 2, 3]))
+                .dicts()
+            )
+
+            # f. Obras finalizadas en 24 meses o menos
+            indicadores["obras_24m"] = (
+                Obra.select()
+                .join(Etapa)
+                .where(
+                    (Etapa.etapa == "Finalizada") &
+                    (Obra.plazo_meses <= 24)
+                )
+                .count()
+            )
+
+            # g. Monto total de inversión
+            indicadores["monto_total_inversion"] = int(
+                Obra.select(fn.SUM(Obra.monto_contrato)).scalar() or 0
+            )
+
+            return indicadores
+
+        except Exception as e:
+            print(f"[ERROR] obtener_indicadores: {e}")
+            return None
 
         finally:
             try:
@@ -449,9 +527,10 @@ class GestionarObra(ABC):
             except:
                 pass
 
-    @classmethod
+
+@classmethod
     # Ver los campos únicos de cada tabla
-    def obtener_campos_unicos(cls, modelo, columna):
+def obtener_campos_unicos(cls, modelo, columna):
         print("[MÉTODO] obtener_campos_unicos")
         # Devuelve los valores únicos de la columna que se le dice
         # Validar que el modelo sea un modelo Peewee
@@ -476,12 +555,12 @@ class GestionarObra(ABC):
 
 
 # Creacion de estructura y carga de datos
-"""
+'''
 GestionarObra.extraer_datos()
 GestionarObra.limpiar_datos()
 GestionarObra.mapear_orm()
 GestionarObra.cargar_datos(GestionarObra.df_limpio)
-"""
+'''
 
 # Cargar una nueva obra
 # GestionarObra.nueva_obra()
@@ -511,13 +590,13 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 if __name__ == "__main__":
 
     print("🔵  Inicializando base de datos...")
-    GestionarObra.conectar_db("Inicio")
-    GestionarObra.extraer_datos()
-    GestionarObra.mapear_orm()
-    GestionarObra.limpiar_datos()  # Genera df_limpio interno
-    GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
+GestionarObra.conectar_db("Inicio")
+GestionarObra.extraer_datos()
+GestionarObra.mapear_orm()
+GestionarObra.limpiar_datos()  # Genera df_limpio interno
+GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
 
-    while True:
+while True:
         print("\n===== Observatorio de Obras Urbanas =====")
         print("1. Crear nueva obra")
         print("2. Avanzar etapas de una obra existente")
