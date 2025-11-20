@@ -35,7 +35,6 @@ class GestionarObra(ABC):
     def extraer_datos(cls):
         try:
             df = pd.read_csv(CVS_PATH, sep=";", encoding="latin1")
-            # print(df)
             return df
 
         except FileNotFoundError as e:
@@ -154,6 +153,17 @@ class GestionarObra(ABC):
             cls.df_limpio["etapa"] = (
                 cls.df_limpio["etapa"].str.strip().replace("", "Desconocida")
             )
+
+            # 🟢 Normalizar valores de la columna 'tipo'
+            cls.df_limpio["tipo"] = (
+                    cls.df_limpio["tipo"]
+                    .astype(str)
+                    .str.strip()
+                    .str.title()
+                    .replace("", "Desconocido")
+                    .fillna("Desconocido")
+                    )
+
 
             # 🟢 Normalizar valores de columna  'direccion'
             cls.df_limpio["direccion"] = cls.df_limpio["direccion"].str.upper()
