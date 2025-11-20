@@ -68,11 +68,11 @@ def pedir_str(texto):
             return valor
         print("El valor no puede estar vacío.")
 
-# Validador de fecha YYYY-MM-DD
+# Validador de fecha DD/MM/YYYY
 def pedir_fecha(texto):
     while True:
         valor = input(texto).strip()
         try:
-            return datetime.strptime(valor, "%Y-%m-%d").date()
+            return datetime.strptime(valor, "%d/%m/%Y").date()
         except ValueError:
-            print("Formato incorrecto. Debe ser YYYY-MM-DD.")
+            print("Formato incorrecto. Debe ser DD/MM/YYYY.")

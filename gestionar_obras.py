@@ -104,7 +104,7 @@ class GestionarObra(ABC):
                         "imagen_2",
                         "imagen_3",
                         "imagen_4",
-                        "beneficiarios",  # Nose si la sacaria
+                        "beneficiarios",
                         "compromiso",
                         "ba_elige",
                         "link_interno",
@@ -270,9 +270,9 @@ class GestionarObra(ABC):
             entorno = pedir_str("Ingrese el entorno: ")
 
             monto_contrato = pedir_int("Ingrese el monto del contrato: ")
-            fecha_inicio = pedir_fecha("Ingrese la fecha de inicio (YYYY-MM-DD): ")
+            fecha_inicio = pedir_fecha("Ingrese la fecha de inicio (DD/MM/YYYY): ")
             fecha_fin_inicial = pedir_fecha(
-                "Ingrese la fecha de finalización (YYYY-MM-DD): "
+                "Ingrese la fecha de finalización (DD/MM/YYYY): "
             )
 
             plazo_meses = pedir_int("Ingrese el plazo en meses: ")
