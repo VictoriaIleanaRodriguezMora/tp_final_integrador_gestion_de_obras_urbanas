@@ -80,12 +80,12 @@ class GestionarObra(ABC):
             GestionarObra.desconectar_db("mapear_orm")
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”) que contiene el objeto Dataframe en la base de  datos relacional SQLite. Para ello se debe utilizar el método de clase Model create() en  cada una de las clase del modelo ORM definido.
+
     @classmethod
     def limpiar_datos(cls):
         print("[MÉTODO] limpiar_datos")
         try:
             df = cls.extraer_datos()
-            # print("df obtenido: ", df)
 
             # 🟢 Normalizar nombres de columnas
             df.columns = (
@@ -95,9 +95,9 @@ class GestionarObra(ABC):
                 .str.replace(" ", "_")
             )
 
-            # Se crea el cls.df_limpio, donde ya usa las columnas normalizadas de df.columns
+            # 🟢 Crear df_limpio (recién ACÁ lo creamos)
             cls.df_limpio = (
-                df.drop(  # Quita las columnas especificadas
+                df.drop(
                     columns=[
                         "lat",
                         "lng",
@@ -113,11 +113,9 @@ class GestionarObra(ABC):
                         "estudio_ambiental_descarga",
                     ]
                 )
-                .drop_duplicates()  # Quita filas duplicadas
-                .assign(
-                    monto_contrato=df["monto_contrato"].str.strip()
-                )  # Assign agrega una nueva columna al df
-                .fillna(  # Rellena los valores nulos
+                .drop_duplicates()
+                .assign(monto_contrato=df["monto_contrato"].str.strip())
+                .fillna(
                     {
                         "expediente_numero": 0,
                         "destacada": "NO",
@@ -146,38 +144,54 @@ class GestionarObra(ABC):
                 )
             )
 
-            # 🟢 Normalizar valores de columna 'etapa'
-            cls.df_limpio["etapa"] = cls.df_limpio["etapa"].str.capitalize().str.strip()
-            cls.df_limpio["etapa"] = cls.df_limpio["etapa"].fillna("Desconocida")
-            cls.df_limpio["etapa"] = cls.df_limpio["etapa"].replace("", "Desconocida")
+            # 🟢 Reemplazar ACENTOS en TODAS las columnas string
+            cols = cls.df_limpio.select_dtypes(include=["object"]).columns
+
+            for c in cols:
+                cls.df_limpio[c] = (
+                    cls.df_limpio[c]
+                    .astype(str)
+                    .str.replace("á", "a")
+                    .str.replace("é", "e")
+                    .str.replace("í", "i")
+                    .str.replace("ó", "o")
+                    .str.replace("ú", "u")
+                    .str.replace("Á", "A")
+                    .str.replace("É", "E")
+                    .str.replace("Í", "I")
+                    .str.replace("Ó", "O")
+                    .str.replace("Ú", "U")
+                )
+
+            # 🟢 Normalizar otras columnas
             cls.df_limpio["etapa"] = (
-                cls.df_limpio["etapa"].str.strip().replace("", "Desconocida")
+                cls.df_limpio["etapa"]
+                .str.capitalize()
+                .str.strip()
+                .replace("", "Desconocida")
+                .fillna("Desconocida")
             )
 
-            # 🟢 Normalizar valores de la columna 'tipo'
             cls.df_limpio["tipo"] = (
-                    cls.df_limpio["tipo"]
-                    .astype(str)
-                    .str.strip()
-                    .str.title()
-                    .replace("", "Desconocido")
-                    .fillna("Desconocido")
-                    )
+                cls.df_limpio["tipo"]
+                .astype(str)
+                .str.strip()
+                .str.title()
+                .replace("", "Desconocido")
+                .fillna("Desconocido")
+            )
 
-
-            # 🟢 Normalizar valores de columna  'direccion'
             cls.df_limpio["direccion"] = cls.df_limpio["direccion"].str.upper()
 
-            # 🟢 Quitar columnas duplicadas
+            cls.df_limpio["barrio"] = cls.df_limpio["barrio"].str.lower().str.strip()
+
             cls.df_limpio = cls.df_limpio.drop_duplicates()
 
-            cls.df_limpio.to_csv(
-                "datos_limpios.csv", index=False
-            )  # Aca creamos csv con datos limpios.
+            cls.df_limpio.to_csv("datos_limpios.csv", index=False)
 
             print("✅ Datos limpiados")
-            print("✨ Los datos se limpiaron correctamente")
             return cls.df_limpio
+
         except Exception as e:
             print("[ERROR] limpiar_datos - Error al limpiar datos: ", e)
 
@@ -350,99 +364,7 @@ class GestionarObra(ABC):
         except Exception as e:
             print(f"[ERROR] nueva_obra - No se pudo crear la nueva Obra: {e}")
             return None
-    '''
-    @classmethod
-    def obtener_indicadores(cls):
-        try:
-            cls.conectar_db("obtener_indicadores")
 
-            indicadores = {}
-
-            # total de obras
-            indicadores["total_obras"] = Obra.select().count()
-
-            # obras por etapa
-            query_etapa = (
-                Obra.select(
-                    Etapa.etapa.alias("etapa"), fn.COUNT(Obra.id).alias("cantidad")
-                )
-                .join(Etapa, on=(Obra.etapa_fk == Etapa.id))
-                .group_by(Etapa.etapa)
-                .dicts()
-            )
-            indicadores["obras_por_etapa"] = list(query_etapa)
-
-            # obras por tipo de obra
-            query_tipo = (
-                Obra.select(
-                    TipoObra.tipo_obra.alias("tipo"),
-                    fn.COUNT(Obra.id).alias("cantidad"),
-                )
-                .join(TipoObra, on=(Obra.tipo_obra_fk == TipoObra.id))
-                .group_by(TipoObra.tipo_obra)
-                .dicts()
-            )
-            indicadores["obras_por_tipo"] = list(query_tipo)
-
-            # obras por comuna
-            query_comuna = (
-                Obra.select(
-                    Ubicacion.comuna.alias("comuna"),
-                    fn.COUNT(Obra.id).alias("cantidad"),
-                )
-                .join(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
-                .group_by(Ubicacion.comuna)
-                .dicts()
-            )
-            indicadores["obras_por_comuna"] = list(query_comuna)
-
-            # monto total adjudicado
-            monto_total = Obra.select(fn.SUM(Obra.monto_contrato)).scalar()
-            indicadores["monto_total"] = int(monto_total or 0)
-
-            # avance promedio
-            avance_promedio = Obra.select(fn.AVG(Obra.porcentaje_avance)).scalar()
-            indicadores["avance_promedio"] = float(avance_promedio or 0)
-
-            # obras destacadas
-            indicadores["obras_destacadas"] = (
-                Obra.select().where(Obra.destacada == "SI").count()
-            )
-
-            # top 5 barrios con más obras
-            query_barrios = (
-                Obra.select(
-                    Ubicacion.barrio.alias("barrio"),
-                    fn.COUNT(Obra.id).alias("cantidad"),
-                )
-                .join(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
-                .group_by(Ubicacion.barrio)
-                .order_by(fn.COUNT(Obra.id).desc())
-                .limit(5)
-                .dicts()
-            )
-            indicadores["top5_barrios"] = list(query_barrios)
-
-            # obras por área responsable
-            query_area = (
-                Obra.select(
-                    AreaResponsable.area_responsable.alias("area"),
-                    fn.COUNT(Obra.id).alias("cantidad"),
-                )
-                .join(
-                    AreaResponsable, on=(Obra.area_responsable_fk == AreaResponsable.id)
-                )
-                .group_by(AreaResponsable.area_responsable)
-                .dicts()
-            )
-            indicadores["obras_por_area"] = list(query_area)
-
-            return indicadores
-
-        except Exception as e:
-            print(f"[ERROR] al obtener indicadores: {e}")
-            return None
-    '''    
     @classmethod
     def obtener_indicadores(cls):
         try:
@@ -456,15 +378,12 @@ class GestionarObra(ABC):
             ]
 
             # b. Listado de todos los tipos de obra
-            indicadores["tipos_obra"] = [
-                t.tipo_obra for t in TipoObra.select()
-            ]
+            indicadores["tipos_obra"] = [t.tipo_obra for t in TipoObra.select()]
 
             # c. Cantidad de obras por etapa
             indicadores["obras_por_etapa"] = list(
                 Obra.select(
-                    Etapa.etapa.alias("etapa"),
-                    fn.COUNT(Obra.id).alias("cantidad")
+                    Etapa.etapa.alias("etapa"), fn.COUNT(Obra.id).alias("cantidad")
                 )
                 .join(Etapa)
                 .group_by(Etapa.etapa)
@@ -474,9 +393,7 @@ class GestionarObra(ABC):
             # d. Cantidad y monto total por tipo de obra
             datos_tipo = []
             for tipo in TipoObra.select():
-                cantidad = Obra.select().where(
-                    Obra.tipo_obra_fk == tipo
-                ).count()
+                cantidad = Obra.select().where(Obra.tipo_obra_fk == tipo).count()
 
                 monto = (
                     Obra.select(fn.SUM(Obra.monto_contrato))
@@ -484,11 +401,13 @@ class GestionarObra(ABC):
                     .scalar()
                 ) or 0
 
-                datos_tipo.append({
-                    "tipo": tipo.tipo_obra,
-                    "cantidad": cantidad,
-                    "monto_total": int(monto)
-                })
+                datos_tipo.append(
+                    {
+                        "tipo": tipo.tipo_obra,
+                        "cantidad": cantidad,
+                        "monto_total": int(monto),
+                    }
+                )
 
             indicadores["datos_por_tipo"] = datos_tipo
 
@@ -496,6 +415,9 @@ class GestionarObra(ABC):
             indicadores["barrios_123"] = list(
                 Ubicacion.select(Ubicacion.comuna, Ubicacion.barrio)
                 .where(Ubicacion.comuna.in_([1, 2, 3]))
+                .group_by(Ubicacion.comuna, Ubicacion.barrio)
+                .distinct()
+                .order_by(Ubicacion.comuna, Ubicacion.barrio)
                 .dicts()
             )
 
@@ -503,10 +425,7 @@ class GestionarObra(ABC):
             indicadores["obras_24m"] = (
                 Obra.select()
                 .join(Etapa)
-                .where(
-                    (Etapa.etapa == "Finalizada") &
-                    (Obra.plazo_meses <= 24)
-                )
+                .where((Etapa.etapa == "Finalizada") & (Obra.plazo_meses <= 24))
                 .count()
             )
 
@@ -529,38 +448,38 @@ class GestionarObra(ABC):
 
 
 @classmethod
-    # Ver los campos únicos de cada tabla
+# Ver los campos únicos de cada tabla
 def obtener_campos_unicos(cls, modelo, columna):
-        print("[MÉTODO] obtener_campos_unicos")
-        # Devuelve los valores únicos de la columna que se le dice
-        # Validar que el modelo sea un modelo Peewee
-        if not hasattr(modelo, "_meta"):
-            raise TypeError(f"[raise] {modelo.__name__} no es un modelo Peewee válido.")
+    print("[MÉTODO] obtener_campos_unicos")
+    # Devuelve los valores únicos de la columna que se le dice
+    # Validar que el modelo sea un modelo Peewee
+    if not hasattr(modelo, "_meta"):
+        raise TypeError(f"[raise] {modelo.__name__} no es un modelo Peewee válido.")
 
-        # Validar que la columna exista
-        if columna not in modelo._meta.fields:
-            raise ValueError(
-                f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
-            )
+    # Validar que la columna exista
+    if columna not in modelo._meta.fields:
+        raise ValueError(
+            f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
+        )
 
-        campo = modelo._meta.fields[columna]
+    campo = modelo._meta.fields[columna]
 
-        # SELECT DISTINCT columna. UNIQUE de pandas
-        consulta = modelo.select(campo).distinct().tuples()
+    # SELECT DISTINCT columna. UNIQUE de pandas
+    consulta = modelo.select(campo).distinct().tuples()
 
-        # Valor es (3,) valor[0] es 3
-        rtado = [valor[0] for valor in consulta]
-        print(rtado)
-        return rtado
+    # Valor es (3,) valor[0] es 3
+    rtado = [valor[0] for valor in consulta]
+    print(rtado)
+    return rtado
 
 
 # Creacion de estructura y carga de datos
-'''
+"""
 GestionarObra.extraer_datos()
 GestionarObra.limpiar_datos()
 GestionarObra.mapear_orm()
 GestionarObra.cargar_datos(GestionarObra.df_limpio)
-'''
+"""
 
 # Cargar una nueva obra
 # GestionarObra.nueva_obra()
@@ -597,127 +516,125 @@ GestionarObra.limpiar_datos()  # Genera df_limpio interno
 GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
 
 while True:
-        print("\n===== Observatorio de Obras Urbanas =====")
-        print("1. Crear nueva obra")
-        print("2. Avanzar etapas de una obra existente")
-        print("3. Mostrar indicadores")
-        print("4. Ver los valores únicos de una tabla")
-        print("5. Salir")
-        opcion = input("Seleccione una opción: ").strip()
+    print("\n===== Observatorio de Obras Urbanas =====")
+    print("1. Crear nueva obra")
+    print("2. Avanzar etapas de una obra existente")
+    print("3. Mostrar indicadores")
+    print("4. Ver los valores únicos de una tabla")
+    print("5. Salir")
+    opcion = input("Seleccione una opción: ").strip()
 
-        match opcion:
-            case "1":
-                cantidad_obras = 0
-                while True:
-                    obra = GestionarObra.nueva_obra()
+    match opcion:
+        case "1":
+            cantidad_obras = 0
+            while True:
+                obra = GestionarObra.nueva_obra()
 
-                    if obra:
-                        cantidad_obras += 1
-                        print(f"Obra '{obra.nombre}' creada correctamente.")
+                if obra:
+                    cantidad_obras += 1
+                    print(f"Obra '{obra.nombre}' creada correctamente.")
 
-                    if cantidad_obras >= 2:
-                        salir = input("¿Desea cargar otra obra? (s/n): ").lower()
-                        if salir == "n":
-                            break
-                    else:
-                        print("Debe cargar al menos 2 obras antes de salir.")
-
-            case "2":
-                try:
-                    obra_id = int(input("\nIngrese el ID de la obra: "))
-                    obra = Obra.get_by_id(obra_id)
-                except Exception:
-                    print("ID inválido o la obra no existe.")
-                    continue
-
-                print(f"\nAvanzando etapas para la obra: {obra.nombre}")
-
-                # Etapa 1
-                obra.nuevo_proyecto()
-
-                # Etapa 2
-                obra.iniciar_contratacion()
-
-                # Etapa 3
-                obra.adjudicar_obra()
-
-                # Etapa 4
-                obra.iniciar_obra()
-
-                # Etapa 5
-                obra.actualizar_porcentaje_avance()
-
-                # Opcionales
-                while True:
-                    opcionales = (
-                        input("\n¿Incrementar plazo de meses y mano de obra? (s/n)")
-                        .strip()
-                        .lower()
-                    )
-
-                    if opcionales == "s":
-                        obra.incrementar_plazo()
-                        obra.incrementar_mano_obra()
+                if cantidad_obras >= 2:
+                    salir = input("¿Desea cargar otra obra? (s/n): ").lower()
+                    if salir == "n":
                         break
-                    elif opcionales == "n":
-                        break
-
-                # Final o rescesion
-                while True:
-                    opcion_final = (
-                        input("\n¿Finalizar (F) o Rescindir (R) la obra? ")
-                        .strip()
-                        .lower()
-                    )
-
-                    if opcion_final == "f":
-                        obra.finalizar_obra()
-                        print("La obra ha sido FINALIZADA.")
-                        break
-                    elif opcion_final == "r":
-                        obra.rescindir_obra()
-                        print("La obra ha sido RESCINDIDA.")
-                        break
-                    else:
-                        print("Opción inválida, intente nuevamente.")
-
-            case "3":
-                indicadores = GestionarObra.obtener_indicadores()
-
-                print("\n📊 ===== INDICADORES =====\n")
-
-                for key, value in indicadores.items():
-                    print(f"🔹 {key.upper()}:")
-                    print(f"   {value}\n")
-
-            case "4":
-                print("\nModelos disponibles:")
-                print("Etapa, AreaResponsable, Ubicacion, Contratacion, TipoObra, Obra")
-
-                modelo_nombre = input("Ingrese el nombre del modelo: ").strip()
-                columna = input("Ingrese el nombre de la columna: ").strip()
-
-                modelos = {
-                    "Etapa": Etapa,
-                    "AreaResponsable": AreaResponsable,
-                    "Ubicacion": Ubicacion,
-                    "Contratacion": Contratacion,
-                    "TipoObra": TipoObra,
-                    "Obra": Obra,
-                }
-
-                if modelo_nombre in modelos:
-                    GestionarObra.obtener_campos_unicos(
-                        modelo=modelos[modelo_nombre], columna=columna
-                    )
                 else:
-                    print("Modelo inválido.")
+                    print("Debe cargar al menos 2 obras antes de salir.")
 
-            case "5":
-                print("Cerrando sistema...")
-                if not sqlite_db.is_closed():
-                    sqlite_db.close()
-                break
+        case "2":
+            try:
+                obra_id = int(input("\nIngrese el ID de la obra: "))
+                obra = Obra.get_by_id(obra_id)
+            except Exception:
+                print("ID inválido o la obra no existe.")
+                continue
 
-            case _:
-                print("Opción inválida. Intente nuevamente.")
+            print(f"\nAvanzando etapas para la obra: {obra.nombre}")
+
+            # Etapa 1
+            obra.nuevo_proyecto()
+
+            # Etapa 2
+            obra.iniciar_contratacion()
+
+            # Etapa 3
+            obra.adjudicar_obra()
+
+            # Etapa 4
+            obra.iniciar_obra()
+
+            # Etapa 5
+            obra.actualizar_porcentaje_avance()
+
+            # Opcionales
+            while True:
+                opcionales = (
+                    input("\n¿Incrementar plazo de meses y mano de obra? (s/n)")
+                    .strip()
+                    .lower()
+                )
+
+                if opcionales == "s":
+                    obra.incrementar_plazo()
+                    obra.incrementar_mano_obra()
+                    break
+                elif opcionales == "n":
+                    break
+
+            # Final o rescesion
+            while True:
+                opcion_final = (
+                    input("\n¿Finalizar (F) o Rescindir (R) la obra? ").strip().lower()
+                )
+
+                if opcion_final == "f":
+                    obra.finalizar_obra()
+                    print("La obra ha sido FINALIZADA.")
+                    break
+                elif opcion_final == "r":
+                    obra.rescindir_obra()
+                    print("La obra ha sido RESCINDIDA.")
+                    break
+                else:
+                    print("Opción inválida, intente nuevamente.")
+
+        case "3":
+            indicadores = GestionarObra.obtener_indicadores()
+
+            print("\n📊 ===== INDICADORES =====\n")
+
+            for key, value in indicadores.items():
+                print(f"🔹 {key.upper()}:")
+                print(f"   {value}\n")
+
+        case "4":
+            print("\nModelos disponibles:")
+            print("Etapa, AreaResponsable, Ubicacion, Contratacion, TipoObra, Obra")
+
+            modelo_nombre = input("Ingrese el nombre del modelo: ").strip()
+            columna = input("Ingrese el nombre de la columna: ").strip()
+
+            modelos = {
+                "Etapa": Etapa,
+                "AreaResponsable": AreaResponsable,
+                "Ubicacion": Ubicacion,
+                "Contratacion": Contratacion,
+                "TipoObra": TipoObra,
+                "Obra": Obra,
+            }
+
+            if modelo_nombre in modelos:
+                GestionarObra.obtener_campos_unicos(
+                    modelo=modelos[modelo_nombre], columna=columna
+                )
+            else:
+                print("Modelo inválido.")
+
+        case "5":
+            print("Cerrando sistema...")
+            if not sqlite_db.is_closed():
+                sqlite_db.close()
+            break
+
+        case _:
+            print("Opción inválida. Intente nuevamente.")
