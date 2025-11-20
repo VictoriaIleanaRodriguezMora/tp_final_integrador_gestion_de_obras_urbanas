@@ -521,7 +521,7 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 
 if __name__ == "__main__":
 
-    print("Inicializando base de datos...")
+    print("🔵  Inicializando base de datos...")
     GestionarObra.conectar_db(fn)
     GestionarObra.extraer_datos()
     GestionarObra.mapear_orm()
@@ -595,7 +595,7 @@ if __name__ == "__main__":
                     elif opcionales == "n":
                         break
 
-                # Final o rescicion
+                # Final o rescesion
                 while True:
                     opcion_final = (
                         input("\n¿Finalizar (F) o Rescindir (R) la obra? ")
