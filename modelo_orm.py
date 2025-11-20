@@ -9,6 +9,7 @@
 # Sin el *: from pewee as pw
 from peewee import *  # Por el * no usamos pw.CharField
 import sqlite3
+from datetime import datetime, date
 
 import os
 from dotenv import load_dotenv
@@ -75,7 +76,7 @@ class Obra(BaseModel):
     entorno = CharField()
     nombre = CharField()
     descripcion = CharField()
-    monto_contrato = IntegerField()
+    monto_contrato = CharField()
     fecha_inicio = DateField(null=True)  # Permite valores nulos
     fecha_fin_inicial = DateField(null=True)
     plazo_meses = IntegerField()
@@ -124,136 +125,169 @@ class Obra(BaseModel):
 
     # Debe modificar el tipo de contratacion de la obra
     def iniciar_contratacion(self):
-        try:
-            iniciar_contratacion = input(
-                "Ingrese un tipo de contratación existente: "
-            ).strip()
-            nuevo_tipo_contratacion = Contratacion.get_or_none(
-                contratacion_tipo=iniciar_contratacion
-            )
-            if not nuevo_tipo_contratacion:
-                raise ValueError(
-                    "El tipo de contratación ingresado no existe en la base de datos"
-                )
-        except Exception as e:
-            print(f"[ERROR] - al buscar el Tipo de Contratación': {e}")
+        print("\n[ETAPA] Iniciar contratación")
 
-        try:
-            nuevo_nro_contratacion = input(
-                "Ingrese un número de contratación: "
-            ).strip()
-            if not nuevo_nro_contratacion:
-                raise ValueError("El número de contratación no es válido")
-        except Exception as e:
-            print(f"[ERROR] - al ingresar un número de contratación': {e}")
+        # Pedir tipo de contratación ya existente en la BD
+        tipo = input("Ingrese un tipo de contratación existente: ").strip()
+        tipo_obj = Contratacion.get_or_none(Contratacion.contratacion_tipo == tipo)
 
-        try:
-            self.contratacion_tipo_fk.contratacion_tipo = nuevo_tipo_contratacion
-            self.contratacion_tipo_fk.nro_contratacion = nuevo_nro_contratacion
-            self.contratacion_tipo_fk.save()
-            self.save()
-            print("Obra completa después de los cambios:", self.__data__)
-        except Exception as e:
-            print(f"[ERROR] - al guardar el tipo y número de contratación': {e}")
+        if not tipo_obj:
+            print("[ERROR] Ese tipo de contratación no existe en la base.")
             return False
 
+        # Pedir número de contratación
+        nro = input("Ingrese el número de contratación: ").strip()
+        if not nro:
+            print("[ERROR] Debe ingresar un número de contratación.")
+            return False
+
+        # Modificar la fila actual
+        self.contratacion_tipo_fk.contratacion_tipo = tipo
+        self.contratacion_tipo_fk.nro_contratacion = nro
+        self.contratacion_tipo_fk.save()
+
+        print("✔ Contratación actualizada correctamente.")
+        return True
     # Debe pedir: nombre, cuit de la empresa que ajudicará una obra. Y número de expediente
     def adjudicar_obra(self):
-        try:
-            nombre_empresa = input(
-                "Ingrese el nombre de la empresa adjudicataria: "
-            ).strip()
-            cuit_empresa = input(
-                "Ingrese el CUIT de la empresa adjudicataria: "
-            ).strip()
+        print("\n[ETAPA] Adjudicar obra")
 
-            contratacion_existente = Contratacion.get_or_none(
-                Contratacion.cuit_contratista == cuit_empresa
-            )
+        empresa = input("Ingrese el nombre de la empresa adjudicataria: ").strip()
+        if not empresa:
+            print("[ERROR] La empresa no puede quedar vacía.")
+            return False
 
-            if not contratacion_existente:
-                raise ValueError(
-                    "No existe una contratación con ese CUIT en la base de datos."
-                )
+        cuit = input("Ingrese el CUIT del contratista: ").strip()
+        if not cuit:
+            print("[ERROR] CUIT inválido.")
+            return False
 
-            nro_expediente = input("Ingrese número de expediente: ").strip()
+        # Guardar CUIT en la fila de Contratación
+        self.contratacion_tipo_fk.cuit_contratista = cuit
+        self.contratacion_tipo_fk.save()
 
-            self.licitacion_oferta_empresa = nombre_empresa
-            self.expediente_numero = nro_expediente
-            self.save()
+        # Asignar empresa adjudicataria a la obra
+        self.licitacion_oferta_empresa = empresa
 
-            print(
-                f"[OK] La obra '{self.nombre}' fue adjudicada a {nombre_empresa} (CUIT {cuit_empresa})."
-            )
+        # Pedir expediente
+        exp = input("Ingrese el número de expediente adjudicado: ").strip()
+        if not exp:
+            print("[ERROR] El expediente no puede quedar vacío.")
+            return False
 
-        except Exception as e:
-            print("[ERROR en adjudicar_obra]", e)
+        self.expediente_numero = exp
+        self.save()
+
+        print("✔ Obra adjudicada correctamente.")
+        return True
 
     # Debe pedir: nueva fecha de inicio, nueva fecha de fin inicial
     def iniciar_obra(self):
-        try:
-            self.destacada = input("¿Es destacada? (SI/NO): ").strip()
+         print("\n[ETAPA] Iniciar obra")
+         
+         try:
+            inicio = input("Fecha de inicio (DD/MM/YYYY): ").strip()
+            fin = input("Fecha fin inicial (DD/MM/YYYY): ").strip()
 
-            fecha_ini = input("Fecha inicio (DD/MM/YYYY): ").strip()
-            fecha_fin = input("Fecha fin inicial (DD/MM/YYYY): ").strip()
+            # Convertimos a datetime.date
+            fecha_inicio = datetime.strptime(inicio, "%d/%m/%Y").date()
+            fecha_fin = datetime.strptime(fin, "%d/%m/%Y").date()
 
-            self.fecha_inicio = fecha_ini
+            self.fecha_inicio = fecha_inicio
             self.fecha_fin_inicial = fecha_fin
-
-            financiamiento = input("Fuente de financiamiento: ").strip()
-            self.financiamiento = financiamiento
-
-            self.mano_obra = int(input("Mano de obra inicial: "))
-
             self.save()
-            print("[OK] Obra iniciada.")
 
-        except Exception as e:
-            print("[ERROR en iniciar_obra]", e)
+            print("✔ Fechas actualizadas correctamente.")
+            return True
+         
+         except ValueError:
+            print("[ERROR] Formato de fecha inválido.")
+            return False
+
 
     # Debe pedir: un número, el nuevo porcentaje a actualizar
     def actualizar_porcentaje_avance(self):
-        try:
-            nuevo = int(input("Nuevo porcentaje de avance (0-100): "))
+        print("\n[ETAPA] Actualizar porcentaje de avance")
 
+        try:
+            nuevo = int(input("Ingrese nuevo porcentaje (0 a 100): ").strip())
             if not 0 <= nuevo <= 100:
-                raise ValueError("Debe estar entre 0 y 100.")
+                raise ValueError()
 
             self.porcentaje_avance = nuevo
             self.save()
 
-            print("[OK] Avance actualizado.")
+            print("✔ Porcentaje actualizado.")
+            return True
 
-        except Exception as e:
-            print("[ERROR en actualizar_porcentaje_avance]", e)
+        except ValueError:
+            print("[ERROR] Debe ingresar un número entre 0 y 100.")
+            return False
 
     # Al invocar este método, el porcentaje de avance pasa a 100. Y la etapa = 'Finalizada'
     def finalizar_obra(self):
-        try:
-            etapa_fin = Etapa.get_or_none(etapa="Finalizada")
-            self.etapa_fk = etapa_fin
-            self.porcentaje_avance = 100
-            self.save()
-            print("[OK] Obra finalizada.")
-        except Exception as e:
-            print("[ERROR en finalizar_obra]", e)
+        print("\n[ETAPA] Finalizar obra")
+
+        self.porcentaje_avance = 100
+
+        # Cambia etapa a "Finalizada"
+        etapa_fin, _ = Etapa.get_or_create(etapa="Finalizada")
+        self.etapa_fk = etapa_fin
+
+        self.save()
+        print("✔ Obra finalizada correctamente.")
+        return True
+
 
     # Al invocar este método la etapa =  'Rescindida'
     def rescindir_obra(self):
-        try:
-            etapa_res = Etapa.get_or_none(etapa="Rescisión")
-            self.etapa_fk = etapa_res
-            self.save()
-            print("[OK] Obra rescindida.")
-        except Exception as e:
-            print("[ERROR en rescindir_obra]", e)
+        print("\n[ETAPA] Rescindir obra")
+
+        etapa_res, _ = Etapa.get_or_create(etapa="Rescindida")
+        self.etapa_fk = etapa_res
+        self.save()
+
+        print("✔ Obra rescindida correctamente.")
+        return True
 
     # Opcionales
     def incrementar_plazo(self):
-        pass
+        print("\n[ETAPA] Incrementar plazo")
+
+        try:
+            extra = int(input("¿Cuántos meses desea agregar?: ").strip())
+            if extra < 0:
+                raise ValueError()
+
+            self.plazo_meses += extra
+            self.save()
+
+            print("✔ Plazo incrementado correctamente.")
+            return True
+
+        except ValueError:
+            print("[ERROR] Ingrese un número válido.")
+            return False
+
 
     def incrementar_mano_obra(self):
-        pass
+        print("\n[ETAPA] Incrementar mano de obra")
+
+        try:
+            extra = int(input("¿Cuántas personas agregar a mano de obra?: ").strip())
+            if extra < 0:
+                raise ValueError()
+
+            self.mano_obra += extra
+            self.save()
+
+            print("✔ Mano de obra actualizada.")
+            return True
+
+        except ValueError:
+            print("[ERROR] Ingrese un número válido.")
+            return False
+
 
 
 # PASOS PARA PROBAR ESTOS MÉTODOS DE INSTANCIA

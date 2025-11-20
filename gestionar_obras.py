@@ -25,6 +25,8 @@ from utilities.utility_nueva_obra import (
 
 class GestionarObra(ABC):
     df_limpio = []
+    modelo = 0
+    columna = 0
 
     # sentencias necesarias para manipular el dataset a través de un objeto Dataframe del módulo “pandas”.
     @classmethod
@@ -72,7 +74,7 @@ class GestionarObra(ABC):
             )
 
             print("✅ Datos mapeados")
-            print("✨ Los datos se mapearon correctamente mapear_orm")
+            print("✨ Los datos se mapearon correctamente")
         except Exception as e:
             print("[ERROR] mapear_orm - Error al cargar_datos", e)
         finally:
@@ -119,10 +121,10 @@ class GestionarObra(ABC):
                 .fillna(  # Rellena los valores nulos
                     {
                         "expediente_numero": 0,
-                        "destacada": "Desconocido",
+                        "destacada": "NO",
                         "contratacion_tipo": "Desconocida",
                         "tipo": "Desconocido",
-                        "descripcion": "Desconocido",
+                        "descripcion": "Sin descripcion",
                         "barrio": "Desconocido",
                         "direccion": "Desconocido",
                         "licitacion_oferta_empresa": "Desconocido",
@@ -165,10 +167,10 @@ class GestionarObra(ABC):
             # print("df df_limpio: ", df_limpio["monto_contrato"])
 
             print("✅ Datos limpiados")
-            print("✨ Los datos se limpiaron correctamente limpiar_datos")
+            print("✨ Los datos se limpiaron correctamente")
             return cls.df_limpio
         except Exception as e:
-            print("[ERROR] limpiar_datos - Error al limpiar_datos", e)
+            print("[ERROR] limpiar_datos - Error al limpiar datos: ", e)
 
     # sentencias necesarias para persistir los datos de las obras (ya transformados y “limpios”)
     @classmethod
@@ -177,7 +179,6 @@ class GestionarObra(ABC):
         try:
             print("[MÉTODO] cargar_datos")
             for index, row in df_limpio.iterrows():
-                # SÍ ANDA 🔽
                 ubicacion_obj, booleano = Ubicacion.get_or_create(
                     comuna=row["comuna"],
                     barrio=row["barrio"],
@@ -221,7 +222,7 @@ class GestionarObra(ABC):
                 )
 
             print("✅ Datos cargados.")
-            print("✨ Se realizó la carga de datos cargar_datos")
+            print("✨ Se realizó la carga de datos")
         except Exception as e:
             print("[ERROR] cargar_datos - Error al cargar_datos", e)
         finally:
@@ -352,7 +353,7 @@ class GestionarObra(ABC):
         cls,
     ):  # devuelve un dicionario con indicadores basados en las obras almacenadas en la base SQLite usando Peewee ORM
         try:
-            cls.conectar_db()  # abre conexion
+            cls.conectar_db(fn)  # abre conexion
 
             indicadores = {}  # se crea diccionario con las consultas ORM Peewee
 
@@ -481,11 +482,12 @@ class GestionarObra(ABC):
 
 
 # Creacion de estructura y carga de datos
-
+"""
 GestionarObra.extraer_datos()
 GestionarObra.limpiar_datos()
 GestionarObra.mapear_orm()
 GestionarObra.cargar_datos(GestionarObra.df_limpio)
+"""
 # Cargar una nueva obra
 
 # GestionarObra.nueva_obra()
@@ -510,3 +512,127 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 # obra.actualizar_porcentaje_avance(40)
 # obra.incrementar_plazo(2)
 # obra.finalizar_obra()
+
+if __name__ == '__main__':
+
+    print("Inicializando base de datos...")
+    GestionarObra.conectar_db(fn)
+    GestionarObra.extraer_datos()
+    GestionarObra.mapear_orm()
+    GestionarObra.limpiar_datos()   # Genera df_limpio interno
+    GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
+
+    while True:
+        print("\n===== Observatorio de Obras Urbanas =====")
+        print("1. Crear nueva obra")
+        print("2. Avanzar etapas de una obra existente")
+        print("3. Mostrar indicadores")
+        print("4. Ver los valores únicos de una tabla")
+        print("5. Salir")
+        opcion = input("Seleccione una opción: ").strip()
+
+        match opcion:
+            case "1":
+                cantidad_obras = 0
+                while True:
+                    obra = GestionarObra.nueva_obra()
+
+                    if obra:
+                        cantidad_obras += 1
+                        print(f"Obra '{obra.nombre}' creada correctamente.")
+
+                    if cantidad_obras >= 2:
+                        salir = input("¿Desea cargar otra obra? (s/n): ").lower()
+                        if salir == 'n':
+                            break
+                    else:
+                        print("Debe cargar al menos 2 obras antes de salir.")
+
+            case "2":
+                try:
+                    obra_id = int(input("\nIngrese el ID de la obra: "))
+                    obra = Obra.get_by_id(obra_id)
+                except Exception:
+                    print("ID inválido o la obra no existe.")
+                    continue
+
+                print(f"\nAvanzando etapas para la obra: {obra.nombre}")
+
+                # Etapa 1
+                nueva_etapa = input("Ingrese nueva etapa del proyecto: ").strip()
+                obra.nuevo_proyecto(nueva_etapa)
+
+                # Etapa 2
+                obra.iniciar_contratacion()
+
+                # Etapa 3
+                obra.adjudicar_obra()
+
+                # Etapa 4
+                obra.iniciar_obra()
+
+                # Etapa 5
+                obra.actualizar_porcentaje_avance()
+
+                # Opcionales
+                while True:
+                    opcionales = input("\n¿Incrementar plazo de meses y mano de obra? (s/n)").strip().lower()
+
+                    if opcionales == "s":
+                        obra.incrementar_plazo()
+                        obra.incrementar_mano_obra()
+                        break
+                    elif opcionales == "n":
+                        break
+
+
+                # Final o rescicion
+                while True:
+                    opcion_final = input("\n¿Finalizar (F) o Rescindir (R) la obra? ").strip().lower()
+
+                    if opcion_final == "f":
+                        obra.finalizar_obra()
+                        print("La obra ha sido FINALIZADA.")
+                        break
+                    elif opcion_final == "r":
+                        obra.rescindir_obra()
+                        print("La obra ha sido RESCINDIDA.")
+                        break
+                    else:
+                        print("Opción inválida, intente nuevamente.")
+ 
+            case "3":
+                GestionarObra.obtener_indicadores()
+
+            case "4":
+                print("\nModelos disponibles:")
+                print("Etapa, AreaResponsable, Ubicacion, Contratacion, TipoObra, Obra")
+
+                modelo_nombre = input("Ingrese el nombre del modelo: ").strip()
+                columna = input("Ingrese el nombre de la columna: ").strip()
+
+                modelos = {
+                    "Etapa": Etapa,
+                    "AreaResponsable": AreaResponsable,
+                    "Ubicacion": Ubicacion,
+                    "Contratacion": Contratacion,
+                    "TipoObra": TipoObra,
+                    "Obra": Obra
+                }
+
+                if modelo_nombre in modelos:
+                    GestionarObra.obtener_campos_unicos(
+                        modelo=modelos[modelo_nombre],
+                        columna=columna
+                    )
+                else:
+                    print("Modelo inválido.")
+
+            case "5":
+                print("Cerrando sistema...")
+                if not sqlite_db.is_closed():
+                    sqlite_db.close()
+                break
+
+            case _:
+                print("Opción inválida. Intente nuevamente.")
