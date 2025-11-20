@@ -213,7 +213,7 @@ class GestionarObra(ABC):
                     fecha_fin_inicial=row["fecha_fin_inicial"],
                     plazo_meses=row["plazo_meses"],
                     porcentaje_avance=row["porcentaje_avance"],
-                    licitacion_oferta_empresa="licitacion_oferta_empresa",
+                    licitacion_oferta_empresa=row["licitacion_oferta_empresa"],
                     licitacion_anio=row["licitacion_anio"],
                     mano_obra=row["mano_obra"],
                     destacada=row["destacada"],
