@@ -447,30 +447,30 @@ class GestionarObra(ABC):
                 pass
 
 
-@classmethod
-# Ver los campos únicos de cada tabla
-def obtener_campos_unicos(cls, modelo, columna):
-    print("[MÉTODO] obtener_campos_unicos")
-    # Devuelve los valores únicos de la columna que se le dice
-    # Validar que el modelo sea un modelo Peewee
-    if not hasattr(modelo, "_meta"):
-        raise TypeError(f"[raise] {modelo.__name__} no es un modelo Peewee válido.")
+    @classmethod
+    # Ver los campos únicos de cada tabla
+    def obtener_campos_unicos(cls, modelo, columna):
+        print("[MÉTODO] obtener_campos_unicos")
+        # Devuelve los valores únicos de la columna que se le dice
+        # Validar que el modelo sea un modelo Peewee
+        if not hasattr(modelo, "_meta"):
+            raise TypeError(f"[raise] {modelo.__name__} no es un modelo Peewee válido.")
 
-    # Validar que la columna exista
-    if columna not in modelo._meta.fields:
-        raise ValueError(
-            f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
-        )
+        # Validar que la columna exista
+        if columna not in modelo._meta.fields:
+            raise ValueError(
+                f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
+            )
 
-    campo = modelo._meta.fields[columna]
+        campo = modelo._meta.fields[columna]
 
-    # SELECT DISTINCT columna. UNIQUE de pandas
-    consulta = modelo.select(campo).distinct().tuples()
+        # SELECT DISTINCT columna. UNIQUE de pandas
+        consulta = modelo.select(campo).distinct().tuples()
 
-    # Valor es (3,) valor[0] es 3
-    rtado = [valor[0] for valor in consulta]
-    print(rtado)
-    return rtado
+        # Valor es (3,) valor[0] es 3
+        rtado = [valor[0] for valor in consulta]
+        print(rtado)
+        return rtado
 
 
 # Creacion de estructura y carga de datos
