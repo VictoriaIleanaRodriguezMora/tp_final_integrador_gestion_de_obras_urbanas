@@ -21,7 +21,7 @@ from utilities.utility_nueva_obra import (
     pedir_int,
     pedir_fecha,
     generar_nro_contratacion,
-    obtener_o_crear_ubicacion
+    obtener_o_crear_ubicacion,
 )
 
 
@@ -258,17 +258,7 @@ class GestionarObra(ABC):
             # Tipo de obra
             nvo_tipo = utility_nueva_obra(TipoObra, "tipo_obra", "el tipo de obra")
 
-            # Ubicación
-            # nueva_ubicacion = utility_nueva_obra_multi(
-            #     Ubicacion,
-            #     {
-            #         "comuna": "la comuna",
-            #         "barrio": "el barrio",
-            #         "direccion": "la dirección",
-            #     },
-            # )
             nueva_ubicacion = obtener_o_crear_ubicacion()
-            
 
             # Nueva obra.
             nombre = pedir_str("Ingrese el nombre de la obra: ")
@@ -355,15 +345,13 @@ class GestionarObra(ABC):
             return None
 
     @classmethod
-    def obtener_indicadores(
-        cls,
-    ):  # devuelve un dicionario con indicadores basados en las obras almacenadas en la base SQLite usando Peewee ORM
+    def obtener_indicadores(cls):
         try:
-            cls.conectar_db(fn)  # abre conexion
+            cls.conectar_db("obtener_indicadores")
 
-            indicadores = {}  # se crea diccionario con las consultas ORM Peewee
+            indicadores = {}
 
-            # total de obras, cuenta todos los registros en Obra
+            # total de obras
             indicadores["total_obras"] = Obra.select().count()
 
             # obras por etapa
@@ -371,14 +359,12 @@ class GestionarObra(ABC):
                 Obra.select(
                     Etapa.etapa.alias("etapa"), fn.COUNT(Obra.id).alias("cantidad")
                 )
-                .join(
-                    Etapa, on=(Obra.etapa_fk == Etapa.id)
-                )  # une la tabla Obra con Etapa por la FK
-                .group_by(Etapa.etapa)  # agrupa por el nombre de la etapa
-            )  # resultado: filas con etapa y cantidad
-            indicadores["obras_por_etapa"] = [
-                {"etapa": r.etapa, "cantidad": r.cantidad} for r in query_etapa
-            ]
+                .join(Etapa, on=(Obra.etapa_fk == Etapa.id))
+                .group_by(Etapa.etapa)
+                .dicts()
+            )
+            indicadores["obras_por_etapa"] = list(query_etapa)
+
             # obras por tipo de obra
             query_tipo = (
                 Obra.select(
@@ -387,10 +373,10 @@ class GestionarObra(ABC):
                 )
                 .join(TipoObra, on=(Obra.tipo_obra_fk == TipoObra.id))
                 .group_by(TipoObra.tipo_obra)
+                .dicts()
             )
-            indicadores["obras_por_tipo"] = [
-                {"tipo": r.tipo, "cantidad": r.cantidad} for r in query_tipo
-            ]
+            indicadores["obras_por_tipo"] = list(query_tipo)
+
             # obras por comuna
             query_comuna = (
                 Obra.select(
@@ -399,41 +385,38 @@ class GestionarObra(ABC):
                 )
                 .join(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
                 .group_by(Ubicacion.comuna)
+                .dicts()
             )
-            indicadores["obras_por_comuna"] = [
-                {"comuna": r.comuna, "cantidad": r.cantidad} for r in query_comuna
-            ]
+            indicadores["obras_por_comuna"] = list(query_comuna)
+
             # monto total adjudicado
             monto_total = Obra.select(fn.SUM(Obra.monto_contrato)).scalar()
-            indicadores["monto_total"] = int(
-                monto_total or 0
-            )  # suma todos los monto_contrato, .scalar devuelve el valor o None si no hay registros
+            indicadores["monto_total"] = int(monto_total or 0)
 
             # avance promedio
             avance_promedio = Obra.select(fn.AVG(Obra.porcentaje_avance)).scalar()
-            indicadores["avance_promedio"] = float(
-                avance_promedio or 0
-            )  # devuelve promedio
+            indicadores["avance_promedio"] = float(avance_promedio or 0)
 
             # obras destacadas
-            obras_destacadas = Obra.select().where(Obra.destacada == "SI").count()
-            indicadores["obras_destacadas"] = obras_destacadas
+            indicadores["obras_destacadas"] = (
+                Obra.select().where(Obra.destacada == "SI").count()
+            )
 
-            # top 5 barrios con mas obras desde Ubicacion.barrio
+            # top 5 barrios con más obras
             query_barrios = (
                 Obra.select(
                     Ubicacion.barrio.alias("barrio"),
                     fn.COUNT(Obra.id).alias("cantidad"),
                 )
-                .JOIN(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
+                .join(Ubicacion, on=(Obra.ubicacion_fk == Ubicacion.id))
+                .group_by(Ubicacion.barrio)
                 .order_by(fn.COUNT(Obra.id).desc())
                 .limit(5)
+                .dicts()
             )
-            indicadores["top5_barrios"] = [
-                {"barrio": r.barrio, "cantidad": r.cantidad} for r in query_barrios
-            ]
+            indicadores["top5_barrios"] = list(query_barrios)
 
-            # obras por area responsable
+            # obras por área responsable
             query_area = (
                 Obra.select(
                     AreaResponsable.area_responsable.alias("area"),
@@ -443,12 +426,10 @@ class GestionarObra(ABC):
                     AreaResponsable, on=(Obra.area_responsable_fk == AreaResponsable.id)
                 )
                 .group_by(AreaResponsable.area_responsable)
+                .dicts()
             )
-            indicadores["obras_por_area"] = [
-                {"area": r.area, "cantidad": r.cantidad} for r in query_area
-            ]
+            indicadores["obras_por_area"] = list(query_area)
 
-            # devuelve diccionario
             return indicadores
 
         except Exception as e:
@@ -457,34 +438,36 @@ class GestionarObra(ABC):
 
         finally:
             try:
-                cls.desconectar_db()
-            except Exception:
+                cls.desconectar_db("obtener_indicadores")
+            except:
                 pass
 
     @classmethod
     # Ver los campos únicos de cada tabla
     def obtener_campos_unicos(cls, modelo, columna):
-        print("[MÉTODO] obtener_campos_unicos")
-        # Devuelve los valores únicos de la columna que se le dice
-        # Validar que el modelo sea un modelo Peewee
-        if not hasattr(modelo, "_meta"):
-            raise TypeError(f"[raise] {modelo.__name__} no es un modelo Peewee válido.")
+            print("[MÉTODO] obtener_campos_unicos")
+            # Devuelve los valores únicos de la columna que se le dice
+            # Validar que el modelo sea un modelo Peewee
+            if not hasattr(modelo, "_meta"):
+                raise TypeError(
+                    f"[raise] {modelo.__name__} no es un modelo Peewee válido."
+                )
 
-        # Validar que la columna exista
-        if columna not in modelo._meta.fields:
-            raise ValueError(
-                f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
-            )
+            # Validar que la columna exista
+            if columna not in modelo._meta.fields:
+                raise ValueError(
+                    f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
+                )
 
-        campo = modelo._meta.fields[columna]
+            campo = modelo._meta.fields[columna]
 
-        # SELECT DISTINCT columna. UNIQUE de pandas
-        consulta = modelo.select(campo).distinct().tuples()
+            # SELECT DISTINCT columna. UNIQUE de pandas
+            consulta = modelo.select(campo).distinct().tuples()
 
-        # Valor es (3,) valor[0] es 3
-        rtado = [valor[0] for valor in consulta]
-        print(rtado)
-        return rtado
+            # Valor es (3,) valor[0] es 3
+            rtado = [valor[0] for valor in consulta]
+            print(rtado)
+            return rtado
 
 
 # Creacion de estructura y carga de datos
@@ -522,7 +505,7 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 if __name__ == "__main__":
 
     print("🔵  Inicializando base de datos...")
-    GestionarObra.conectar_db(fn)
+    GestionarObra.conectar_db("Inicio")
     GestionarObra.extraer_datos()
     GestionarObra.mapear_orm()
     GestionarObra.limpiar_datos()  # Genera df_limpio interno
@@ -615,7 +598,13 @@ if __name__ == "__main__":
                         print("Opción inválida, intente nuevamente.")
 
             case "3":
-                GestionarObra.obtener_indicadores()
+                indicadores = GestionarObra.obtener_indicadores()
+
+                print("\n📊 ===== INDICADORES =====\n")
+
+                for key, value in indicadores.items():
+                    print(f"🔹 {key.upper()}:")
+                    print(f"   {value}\n")
 
             case "4":
                 print("\nModelos disponibles:")
