@@ -104,31 +104,21 @@ class Obra(BaseModel):
     # Los métodos de instancia necesitan una instancia de una clase y pueden acceder dicha instancia por medio de self
 
     # Debe modificar la Etapa de la obra
-    def nuevo_proyecto(self, nueva_etapa: str):
-        # self es el objeto Obra
-        # self.etapa_fk - es el objeto Etapa vinculado por la FK
-        # self.etapa_fk.etapa - es el valor del campo etapa dentro del modelo Etapa
-        print("nuevo_proyecto")
-        print("Obra completa:", self.__data__)
-
+    # Debe modificar la Etapa de la obra
+    def nuevo_proyecto(self):
+        print("\n[ETAPA] Nuevo proyecto iniciado.")
         try:
-            # buscar o crear la etapa nueva_etapa
-            etapa_pewee, created = Etapa.get_or_create(etapa=nueva_etapa)
+            
+        # Cambia etapa a "Proyecto"
+            etapa_proyecto, _ = Etapa.get_or_create(etapa="Proyecto")
+            self.etapa_fk = etapa_proyecto
 
-            # created es un booleano que devuelve True o False
-            if created:
-                print(f"etapa {nueva_etapa} creada exitosamente en la DB.")
-                # asignar la etapa a la obra
-                self.etapa_fk = etapa_pewee
-                self.save()  # guardar los cambios
+            self.save()
+            print("✔ Proyecto iniciado correctamente.")
+            return True
 
-            print("ID de etapa FK:", self.etapa_fk.id)
-            print("Nombre etapa:", self.etapa_fk.etapa)
-
-            # mostrar todos los atributos
-            print("Obra completa después de los cambios:", self.__data__)
         except Exception as e:
-            print(f"[ERROR] - al validar los registros': {e}")
+            print(f"[ERROR] - no se pudo asignar la etapa proyecto.': {e}")
 
     # Debe modificar el tipo de contratacion de la obra
     def iniciar_contratacion(self):

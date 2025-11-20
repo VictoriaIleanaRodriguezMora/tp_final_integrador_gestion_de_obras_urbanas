@@ -548,8 +548,7 @@ if __name__ == "__main__":
                 print(f"\nAvanzando etapas para la obra: {obra.nombre}")
 
                 # Etapa 1
-                nueva_etapa = input("Ingrese nueva etapa del proyecto: ").strip()
-                obra.nuevo_proyecto(nueva_etapa)
+                obra.nuevo_proyecto()
 
                 # Etapa 2
                 obra.iniciar_contratacion()
