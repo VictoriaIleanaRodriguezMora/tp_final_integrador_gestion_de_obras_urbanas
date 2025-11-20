@@ -97,6 +97,7 @@ class Obra(BaseModel):
     # Los métodos de instancia necesitan una instancia de una clase y pueden acceder dicha instancia por medio de self
 
     # Debe modificar la Etapa de la obra
+    # Debe modificar la Etapa de la obra
     def nuevo_proyecto(self):
         print("\n[ETAPA] Nuevo proyecto iniciado.")
         try:

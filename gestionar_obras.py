@@ -472,8 +472,8 @@ GestionarObra.limpiar_datos()
 GestionarObra.mapear_orm()
 GestionarObra.cargar_datos(GestionarObra.df_limpio)
 """
-# Cargar una nueva obra
 
+# Cargar una nueva obra
 # GestionarObra.nueva_obra()
 
 
@@ -497,6 +497,7 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 # obra.incrementar_plazo(2)
 # obra.finalizar_obra()
 
+# Menú
 if __name__ == "__main__":
 
     print("🔵  Inicializando base de datos...")
