@@ -34,22 +34,27 @@ class BaseModel(Model):
 
 class Etapa(BaseModel):
     etapa = CharField(unique=True, null=False)
+
     class Meta:
         table_name = "Etapa"
 
 
 class TipoObra(BaseModel):
     tipo_obra = CharField(unique=True, null=False)
+
     class Meta:
         table_name = "TipoObra"
 
+
 class AreaResponsable(BaseModel):
     area_responsable = CharField(unique=True, null=False)
+
     class Meta:
-            table_name = "AreaResponsable"
+        table_name = "AreaResponsable"
+
 
 class Ubicacion(BaseModel):
-    comuna = IntegerField()  # No sé si la comuna es la mejor opcion para ID
+    comuna = IntegerField()
     barrio = CharField()
     # nombre_calle = CharField()
     # altura = CharField()
@@ -64,8 +69,10 @@ class Contratacion(BaseModel):
     contratacion_tipo = CharField()
     nro_contratacion = CharField()
     cuit_contratista = CharField()
+
     class Meta:
-            table_name = "Contratacion"
+        table_name = "Contratacion"
+
 
 class Obra(BaseModel):
     etapa_fk = ForeignKeyField(Etapa)  # FK
@@ -86,7 +93,7 @@ class Obra(BaseModel):
     mano_obra = IntegerField()
     destacada = CharField()
     expediente_numero = CharField()
-    financiamiento = CharField()  
+    financiamiento = CharField()
 
     class Meta:
         table_name = "Obra"
@@ -135,19 +142,13 @@ class Obra(BaseModel):
             print("[ERROR] Ese tipo de contratación no existe en la base.")
             return False
 
-        # Pedir número de contratación
-        nro = input("Ingrese el número de contratación: ").strip()
-        if not nro:
-            print("[ERROR] Debe ingresar un número de contratación.")
-            return False
-
         # Modificar la fila actual
         self.contratacion_tipo_fk.contratacion_tipo = tipo
-        self.contratacion_tipo_fk.nro_contratacion = nro
         self.contratacion_tipo_fk.save()
 
         print("✔ Contratación actualizada correctamente.")
         return True
+
     # Debe pedir: nombre, cuit de la empresa que ajudicará una obra. Y número de expediente
     def adjudicar_obra(self):
         print("\n[ETAPA] Adjudicar obra")
@@ -183,9 +184,9 @@ class Obra(BaseModel):
 
     # Debe pedir: nueva fecha de inicio, nueva fecha de fin inicial
     def iniciar_obra(self):
-         print("\n[ETAPA] Iniciar obra")
-         
-         try:
+        print("\n[ETAPA] Iniciar obra")
+
+        try:
             inicio = input("Fecha de inicio (DD/MM/YYYY): ").strip()
             fin = input("Fecha fin inicial (DD/MM/YYYY): ").strip()
 
@@ -199,11 +200,10 @@ class Obra(BaseModel):
 
             print("✔ Fechas actualizadas correctamente.")
             return True
-         
-         except ValueError:
+
+        except ValueError:
             print("[ERROR] Formato de fecha inválido.")
             return False
-
 
     # Debe pedir: un número, el nuevo porcentaje a actualizar
     def actualizar_porcentaje_avance(self):
@@ -238,7 +238,6 @@ class Obra(BaseModel):
         print("✔ Obra finalizada correctamente.")
         return True
 
-
     # Al invocar este método la etapa =  'Rescindida'
     def rescindir_obra(self):
         print("\n[ETAPA] Rescindir obra")
@@ -269,7 +268,6 @@ class Obra(BaseModel):
             print("[ERROR] Ingrese un número válido.")
             return False
 
-
     def incrementar_mano_obra(self):
         print("\n[ETAPA] Incrementar mano de obra")
 
@@ -287,7 +285,6 @@ class Obra(BaseModel):
         except ValueError:
             print("[ERROR] Ingrese un número válido.")
             return False
-
 
 
 # PASOS PARA PROBAR ESTOS MÉTODOS DE INSTANCIA

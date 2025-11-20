@@ -20,6 +20,8 @@ from utilities.utility_nueva_obra import (
     pedir_str,
     pedir_int,
     pedir_fecha,
+    generar_nro_contratacion,
+    obtener_o_crear_ubicacion
 )
 
 
@@ -76,7 +78,7 @@ class GestionarObra(ABC):
             print("✅ Datos mapeados")
             print("✨ Los datos se mapearon correctamente")
         except Exception as e:
-            print("[ERROR] mapear_orm - Error al cargar_datos", e)
+            print("[ERROR] mapear_orm - Error al mapear_orm", e)
         finally:
             GestionarObra.desconectar_db("mapear_orm")
 
@@ -185,9 +187,11 @@ class GestionarObra(ABC):
                     direccion=row["direccion"],
                 )
 
+                nro_contratacion_utils = generar_nro_contratacion()
+
                 contratacion_obj, booleano = Contratacion.get_or_create(
                     contratacion_tipo=row["contratacion_tipo"],
-                    nro_contratacion=row["nro_contratacion"],
+                    nro_contratacion=nro_contratacion_utils,
                     cuit_contratista=row["cuit_contratista"],
                 )
 
@@ -228,7 +232,7 @@ class GestionarObra(ABC):
         finally:
             GestionarObra.desconectar_db("cargar_datos")
 
-    # sentencias necesarias para obtener información de las obras existentes en la base de datos SQLite a través de sentencias ORM.
+    # las sentencias necesarias para crear nuevas instancias de Obra.
     @classmethod
     def nueva_obra(cls):
         try:
@@ -242,7 +246,7 @@ class GestionarObra(ABC):
             nueva_contratacion = utility_nueva_obra_multi(
                 Contratacion,
                 {
-                    "nro_contratacion": "el número de contratación",
+                    # "nro_contratacion": "el número de contratación",
                     "contratacion_tipo": "el tipo de contratación",
                     "cuit_contratista": "el cuit del contratista",
                 },
@@ -255,14 +259,16 @@ class GestionarObra(ABC):
             nvo_tipo = utility_nueva_obra(TipoObra, "tipo_obra", "el tipo de obra")
 
             # Ubicación
-            nueva_ubicacion = utility_nueva_obra_multi(
-                Ubicacion,
-                {
-                    "comuna": "la comuna",
-                    "barrio": "el barrio",
-                    "direccion": "la dirección",
-                },
-            )
+            # nueva_ubicacion = utility_nueva_obra_multi(
+            #     Ubicacion,
+            #     {
+            #         "comuna": "la comuna",
+            #         "barrio": "el barrio",
+            #         "direccion": "la dirección",
+            #     },
+            # )
+            nueva_ubicacion = obtener_o_crear_ubicacion()
+            
 
             # Nueva obra.
             nombre = pedir_str("Ingrese el nombre de la obra: ")
@@ -513,13 +519,13 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 # obra.incrementar_plazo(2)
 # obra.finalizar_obra()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     print("Inicializando base de datos...")
     GestionarObra.conectar_db(fn)
     GestionarObra.extraer_datos()
     GestionarObra.mapear_orm()
-    GestionarObra.limpiar_datos()   # Genera df_limpio interno
+    GestionarObra.limpiar_datos()  # Genera df_limpio interno
     GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
 
     while True:
@@ -543,7 +549,7 @@ if __name__ == '__main__':
 
                     if cantidad_obras >= 2:
                         salir = input("¿Desea cargar otra obra? (s/n): ").lower()
-                        if salir == 'n':
+                        if salir == "n":
                             break
                     else:
                         print("Debe cargar al menos 2 obras antes de salir.")
@@ -576,7 +582,11 @@ if __name__ == '__main__':
 
                 # Opcionales
                 while True:
-                    opcionales = input("\n¿Incrementar plazo de meses y mano de obra? (s/n)").strip().lower()
+                    opcionales = (
+                        input("\n¿Incrementar plazo de meses y mano de obra? (s/n)")
+                        .strip()
+                        .lower()
+                    )
 
                     if opcionales == "s":
                         obra.incrementar_plazo()
@@ -585,10 +595,13 @@ if __name__ == '__main__':
                     elif opcionales == "n":
                         break
 
-
                 # Final o rescicion
                 while True:
-                    opcion_final = input("\n¿Finalizar (F) o Rescindir (R) la obra? ").strip().lower()
+                    opcion_final = (
+                        input("\n¿Finalizar (F) o Rescindir (R) la obra? ")
+                        .strip()
+                        .lower()
+                    )
 
                     if opcion_final == "f":
                         obra.finalizar_obra()
@@ -600,7 +613,7 @@ if __name__ == '__main__':
                         break
                     else:
                         print("Opción inválida, intente nuevamente.")
- 
+
             case "3":
                 GestionarObra.obtener_indicadores()
 
@@ -617,13 +630,12 @@ if __name__ == '__main__':
                     "Ubicacion": Ubicacion,
                     "Contratacion": Contratacion,
                     "TipoObra": TipoObra,
-                    "Obra": Obra
+                    "Obra": Obra,
                 }
 
                 if modelo_nombre in modelos:
                     GestionarObra.obtener_campos_unicos(
-                        modelo=modelos[modelo_nombre],
-                        columna=columna
+                        modelo=modelos[modelo_nombre], columna=columna
                     )
                 else:
                     print("Modelo inválido.")
