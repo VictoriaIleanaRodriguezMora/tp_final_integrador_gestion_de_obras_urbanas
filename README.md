@@ -13,7 +13,7 @@
 
 ### Modalidad de Trabajo
 - El trabajo se debe realizar en grupo de cinco alumnos.
-- **Nombre de la carpeta del proyecto:** `rodriguez-pobeda-lescano-delossantos-arias`
+- **Nombre de la carpeta del proyecto:** `pobeda-rodriguez-arias-delossantos-lescano`
 
 ---
 

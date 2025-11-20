@@ -4,10 +4,7 @@
   - Aquí se debe incluir  además la clase `BaseModel` heredando de `peewee.Model`
 """
 
-# ❗ Todas las clases de este archivo, pueden (o deben) tener métodos dentro.
-
-# Sin el *: from pewee as pw
-from peewee import *  # Por el * no usamos pw.CharField
+from peewee import * 
 import sqlite3
 from datetime import datetime, date
 
@@ -16,16 +13,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 # Creacion de la bdd vacía
 sqlite_db = SqliteDatabase(
     os.getenv("DB_NAME")
-)  # Es un objeto al que me quiero referir en el futuro
+) 
 print(os.getenv("DB_NAME"))
 
 
 # Este es nuetro modelo normalizado. Basado en pewee. El modelo son las tablas que tendrá la bdd
-# Las clases tienen que entender que pertenecen, representan una tabla que se va a crear en DB_NAME. Para eso, tiene que heredar de Model.
 class BaseModel(Model):
     class Meta:
         # database, es una variable de pewee, al asignarle nuestra bdd. El modelo entiende que va a ser una bdd
@@ -56,8 +51,6 @@ class AreaResponsable(BaseModel):
 class Ubicacion(BaseModel):
     comuna = IntegerField()
     barrio = CharField()
-    # nombre_calle = CharField()
-    # altura = CharField()
     direccion = CharField()
 
     class Meta:
