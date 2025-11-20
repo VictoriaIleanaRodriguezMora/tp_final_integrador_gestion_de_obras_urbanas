@@ -49,9 +49,7 @@ class GestionarObra(ABC):
                 sqlite_db.connect()
                 print(f"🔌 Bdd conectada en {fn}")
         except FileNotFoundError as e:
-            print(
-                "No se ha podido conectar con la base de datos", e
-            )  # 🟡 Agregar info del error
+            print("No se ha podido conectar con la base de datos", e)
 
     # sentencias necesarias para realizar la desconexión a la base de datos “obras_urbanas.db”.
     @classmethod
@@ -160,13 +158,12 @@ class GestionarObra(ABC):
             # 🟢 Normalizar valores de columna  'direccion'
             cls.df_limpio["direccion"] = cls.df_limpio["direccion"].str.upper()
 
-            # 🟢 Quitar valores duplicados
+            # 🟢 Quitar columnas duplicadas
             cls.df_limpio = cls.df_limpio.drop_duplicates()
 
             cls.df_limpio.to_csv(
                 "datos_limpios.csv", index=False
             )  # Aca creamos csv con datos limpios.
-            # print("df df_limpio: ", df_limpio["monto_contrato"])
 
             print("✅ Datos limpiados")
             print("✨ Los datos se limpiaron correctamente")
@@ -445,29 +442,27 @@ class GestionarObra(ABC):
     @classmethod
     # Ver los campos únicos de cada tabla
     def obtener_campos_unicos(cls, modelo, columna):
-            print("[MÉTODO] obtener_campos_unicos")
-            # Devuelve los valores únicos de la columna que se le dice
-            # Validar que el modelo sea un modelo Peewee
-            if not hasattr(modelo, "_meta"):
-                raise TypeError(
-                    f"[raise] {modelo.__name__} no es un modelo Peewee válido."
-                )
+        print("[MÉTODO] obtener_campos_unicos")
+        # Devuelve los valores únicos de la columna que se le dice
+        # Validar que el modelo sea un modelo Peewee
+        if not hasattr(modelo, "_meta"):
+            raise TypeError(f"[raise] {modelo.__name__} no es un modelo Peewee válido.")
 
-            # Validar que la columna exista
-            if columna not in modelo._meta.fields:
-                raise ValueError(
-                    f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
-                )
+        # Validar que la columna exista
+        if columna not in modelo._meta.fields:
+            raise ValueError(
+                f"[raise] La columna '{columna}' no existe en el modelo {modelo.__name__}."
+            )
 
-            campo = modelo._meta.fields[columna]
+        campo = modelo._meta.fields[columna]
 
-            # SELECT DISTINCT columna. UNIQUE de pandas
-            consulta = modelo.select(campo).distinct().tuples()
+        # SELECT DISTINCT columna. UNIQUE de pandas
+        consulta = modelo.select(campo).distinct().tuples()
 
-            # Valor es (3,) valor[0] es 3
-            rtado = [valor[0] for valor in consulta]
-            print(rtado)
-            return rtado
+        # Valor es (3,) valor[0] es 3
+        rtado = [valor[0] for valor in consulta]
+        print(rtado)
+        return rtado
 
 
 # Creacion de estructura y carga de datos
