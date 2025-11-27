@@ -7,7 +7,12 @@
 PENDIENTE:
 🟡 No existe la comuna cero. Tratar eso.
 🟡 Deberiamos verificar cuantos tipos distintos de datos hay
-🟡Unificar mensaje de error
+🟡 Unificar mensaje de error
+Métodos de una obra existente
+🟡 Cuando ingresas un `tipo de contratacion` no existente, no te pide que ignreses uno válido. ⬅️ Y adjudica igualmente la obra.
+✨ Más ambicioso y a futuro, permitirle un prompt para que diga si quiere ver los tipos de contratacion existentes, y mostrarselos.  
+❓ Al modificar datos de una obra existente, `el cuit`, debe existir en la bdd o puede ser uno nuevo?
+🔴 Encontrar la manera para permitir el menú, sin tener que correr la ejecución Creacion, limpieza, carga. Si ya estan cargados, llamar solo al menú
 
 ERRORES
 ✅Error al cargar_datos NOT NULL constraint failed: Etapa.etapa

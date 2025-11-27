@@ -4,7 +4,7 @@
   - Aquí se debe incluir  además la clase `BaseModel` heredando de `peewee.Model`
 """
 
-from peewee import * 
+from peewee import *
 import sqlite3
 from datetime import datetime, date
 
@@ -14,9 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Creacion de la bdd vacía
-sqlite_db = SqliteDatabase(
-    os.getenv("DB_NAME")
-) 
+sqlite_db = SqliteDatabase(os.getenv("DB_NAME"))
 print(os.getenv("DB_NAME"))
 
 
@@ -99,34 +97,45 @@ class Obra(BaseModel):
     # Debe modificar la Etapa de la obra
     # Debe modificar la Etapa de la obra
     def nuevo_proyecto(self):
-        print("\n[ETAPA] Nuevo proyecto iniciado.")
+        print("\n[ETAPA] nuevo_proyecto iniciado.")
         try:
-            
-        # Cambia etapa a "Proyecto"
+
+            # Cambia etapa a "Proyecto"
             etapa_proyecto, _ = Etapa.get_or_create(etapa="Proyecto")
             self.etapa_fk = etapa_proyecto
 
             self.save()
-            print("✔ Proyecto iniciado correctamente.")
+            print(" ✅ [OPERACIÓN - SAVE] Proyecto iniciado correctamente. :)")
             return True
 
         except Exception as e:
-            print(f"[ERROR] - no se pudo asignar la etapa proyecto.': {e}")
+            print(f"[ERROR] - no se pudo asignar la etapa Proyecto.': {e}")
 
     # Debe modificar el tipo de contratacion de la obra
     def iniciar_contratacion(self):
-        print("\n[ETAPA] Iniciar contratación")
+        print("\n[ETAPA] iniciar_contratacion")
 
         # Pedir tipo de contratación ya existente en la BD
-        tipo = input("Ingrese un tipo de contratación existente: ").strip()
-        tipo_obj = Contratacion.get_or_none(Contratacion.contratacion_tipo == tipo)
+        user_tipo = (
+            input("Ingrese un tipo de contratación existente: ").strip().title()
+        )
+        tipo_obj = Contratacion.get_or_none(Contratacion.contratacion_tipo == user_tipo)
 
-        if not tipo_obj:
-            print("[ERROR] Ese tipo de contratación no existe en la base.")
-            return False
+        while tipo_obj == None:
+            print("[ERROR] Ese tipo de contratación no existe en la bdd.")
+            user_tipo = (
+                input("🔄️ Porfavor, ingrese un tipo de contratación existente: ")
+                .strip()
+                .title()
+            )
+            print(f"Usd ingresó: {user_tipo}")
+            tipo_obj = Contratacion.get_or_none(
+                Contratacion.contratacion_tipo == user_tipo
+            )
+            print(f"tipo_obj: {tipo_obj}")
 
         # Modificar la fila actual
-        self.contratacion_tipo_fk.contratacion_tipo = tipo
+        self.contratacion_tipo_fk.contratacion_tipo = user_tipo
         self.contratacion_tipo_fk.save()
 
         print("✔ Contratación actualizada correctamente.")
