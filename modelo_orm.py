@@ -86,6 +86,8 @@ class Obra(BaseModel):
     expediente_numero = CharField()
     financiamiento = CharField()
 
+    id_obra = None  # No se guarda en la bdd
+
     class Meta:
         table_name = "Obra"
 
@@ -105,74 +107,94 @@ class Obra(BaseModel):
             self.etapa_fk = etapa_proyecto
 
             self.save()
-            print(" ✅ [OPERACIÓN - SAVE] Proyecto iniciado correctamente. :)")
+            print("[OPERACIÓN - SAVE] ✅ Proyecto iniciado correctamente. :)")
             return True
 
         except Exception as e:
-            print(f"[ERROR] - no se pudo asignar la etapa Proyecto.': {e}")
+            print(
+                f"[ERROR] nuevo_proyecto - no se pudo asignar la etapa Proyecto.': {e}"
+            )
 
     # Debe modificar el tipo de contratacion de la obra
     def iniciar_contratacion(self):
         print("\n[ETAPA] iniciar_contratacion")
 
-        # Pedir tipo de contratación ya existente en la BD
-        user_tipo = (
-            input("Ingrese un tipo de contratación existente: ").strip().title()
-        )
-        tipo_obj = Contratacion.get_or_none(Contratacion.contratacion_tipo == user_tipo)
-
-        while tipo_obj == None:
-            print("[ERROR] Ese tipo de contratación no existe en la bdd.")
+        try:
+            # Pedir tipo de contratación ya existente en la BD
             user_tipo = (
-                input("🔄️ Porfavor, ingrese un tipo de contratación existente: ")
-                .strip()
-                .title()
+                input("Ingrese un tipo de contratación existente: ").strip().title()
             )
-            print(f"Usd ingresó: {user_tipo}")
             tipo_obj = Contratacion.get_or_none(
                 Contratacion.contratacion_tipo == user_tipo
             )
-            print(f"tipo_obj: {tipo_obj}")
 
-        # Modificar la fila actual
-        self.contratacion_tipo_fk.contratacion_tipo = user_tipo
-        self.contratacion_tipo_fk.save()
+            while tipo_obj == None:
+                print("[ERROR] Ese tipo de contratación no existe en la bdd.")
+                user_tipo = (
+                    input("🔄️ Porfavor, ingrese un tipo de contratación existente: ")
+                    .strip()
+                    .title()
+                )
+                print(f"Usd ingresó: {user_tipo}")
+                tipo_obj = Contratacion.get_or_none(
+                    Contratacion.contratacion_tipo == user_tipo
+                )
 
-        print("✔ Contratación actualizada correctamente.")
-        return True
+            # Modificar la fila actual
+            self.contratacion_tipo_fk.contratacion_tipo = user_tipo
+            self.contratacion_tipo_fk.save()
+
+            print("[OPERACIÓN - SAVE] ✅ Contratación actualizada correctamente.")
+
+        except Exception as e:
+            print(
+                f"[ERROR] iniciar_contratacion - no se pudo asignar la etapa Proyecto.': {e}"
+            )
 
     # Debe pedir: nombre, cuit de la empresa que ajudicará una obra. Y número de expediente
     def adjudicar_obra(self):
+        expediente_original = self.expediente_numero
+
         print("\n[ETAPA] Adjudicar obra")
 
-        empresa = input("Ingrese el nombre de la empresa adjudicataria: ").strip()
-        if not empresa:
-            print("[ERROR] La empresa no puede quedar vacía.")
-            return False
+        try:
 
-        cuit = input("Ingrese el CUIT del contratista: ").strip()
-        if not cuit:
-            print("[ERROR] CUIT inválido.")
-            return False
+            # Pedir expediente
+            user_expediente = input(
+                "Por seguridad, ingrese el número de expediente adjudicado: "
+            ).strip()
+            if not user_expediente:
+                print("[ERROR] El expediente no puede quedar vacío.")
+                return False
+            print(
+                f"user_expediente {user_expediente}, expediente_original {expediente_original}"
+            )
+            while user_expediente != expediente_original:
+                print(
+                    "[ERROR] El número de expediente ingresado no coincide con el registrado."
+                )
+                user_expediente = input(
+                    "🔄️ Porfavor, ingrese el número de expediente adjudicado: "
+                ).strip()
 
-        # Guardar CUIT en la fila de Contratación
-        self.contratacion_tipo_fk.cuit_contratista = cuit
-        self.contratacion_tipo_fk.save()
+            print(
+                "[OPERACIÓN - EVALUACIÓN] ✅ Número de expediente coincide correctamente."
+            )
 
-        # Asignar empresa adjudicataria a la obra
-        self.licitacion_oferta_empresa = empresa
+            empresa = input("Ingrese el nombre de la empresa adjudicataria: ").strip()
+            if not empresa:
+                print("[CAMPO INVÁLIDO] La empresa no puede quedar vacía.")
+                return False
 
-        # Pedir expediente
-        exp = input("Ingrese el número de expediente adjudicado: ").strip()
-        if not exp:
-            print("[ERROR] El expediente no puede quedar vacío.")
-            return False
+            # Asignar empresa adjudicataria a la obra
+            self.licitacion_oferta_empresa = empresa
+            self.save()
+            print("[OPERACIÓN - SAVE] ✅ Empresa adjudicada correctamente.")
 
-        self.expediente_numero = exp
-        self.save()
+            return True
 
-        print("✔ Obra adjudicada correctamente.")
-        return True
+        except Exception as e:
+            print(f"[ERROR] - no se pudo adjudicar la empresa': {e}")
 
     # Debe pedir: nueva fecha de inicio, nueva fecha de fin inicial
     def iniciar_obra(self):

@@ -446,7 +446,6 @@ class GestionarObra(ABC):
             except:
                 pass
 
-
     @classmethod
     # Ver los campos únicos de cada tabla
     def obtener_campos_unicos(cls, modelo, columna):
@@ -506,12 +505,12 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 # obra.finalizar_obra()
 
 # Menú
-# print("🔵  Inicializando base de datos...")
-# GestionarObra.conectar_db("Inicio")
-# GestionarObra.extraer_datos()
-# GestionarObra.mapear_orm()
-# GestionarObra.limpiar_datos()  # Genera df_limpio interno
-# GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
+print("🔵  Inicializando base de datos...")
+GestionarObra.conectar_db("Inicio")
+GestionarObra.extraer_datos()
+GestionarObra.mapear_orm()
+GestionarObra.limpiar_datos()  # Genera df_limpio interno
+GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
 
 if __name__ == "__main__":
     while True:
@@ -544,58 +543,60 @@ if __name__ == "__main__":
                 try:
                     obra_id = int(input("\nIngrese el ID de la obra: "))
                     obra = Obra.get_by_id(obra_id)
-                except Exception:
-                    print("ID inválido o la obra no existe.")
+                    # Etapa 1
+                    obra.nuevo_proyecto()
+
+                    # Etapa 2
+                    obra.iniciar_contratacion()
+
+                    # Etapa 3
+                    obra.adjudicar_obra()
+
+                    # Etapa 4
+                    obra.iniciar_obra()
+
+                    # Etapa 5
+                    obra.actualizar_porcentaje_avance()
+
+                    # Opcionales
+                    while True:
+                        opcionales = (
+                            input("\n¿Incrementar plazo de meses y mano de obra? (s/n)")
+                            .strip()
+                            .lower()
+                        )
+
+                        if opcionales == "s":
+                            obra.incrementar_plazo()
+                            obra.incrementar_mano_obra()
+                            break
+                        elif opcionales == "n":
+                            break
+
+                    # Final o rescesion
+                    while True:
+                        opcion_final = (
+                            input("\n¿Finalizar (F) o Rescindir (R) la obra? ")
+                            .strip()
+                            .lower()
+                        )
+
+                        if opcion_final == "f":
+                            obra.finalizar_obra()
+                            print("La obra ha sido FINALIZADA.")
+                            break
+                        elif opcion_final == "r":
+                            obra.rescindir_obra()
+                            print("La obra ha sido RESCINDIDA.")
+                            break
+                        else:
+                            print("Opción inválida, intente nuevamente.")
+
+                except Exception as e:
+                    print("[ERROR] - Opción 2", e)
                     continue
 
                 print(f"\nAvanzando etapas para la obra: {obra.nombre}")
-
-                # Etapa 1
-                obra.nuevo_proyecto()
-
-                # Etapa 2
-                obra.iniciar_contratacion()
-
-                # Etapa 3
-                obra.adjudicar_obra()
-
-                # Etapa 4
-                obra.iniciar_obra()
-
-                # Etapa 5
-                obra.actualizar_porcentaje_avance()
-
-                # Opcionales
-                while True:
-                    opcionales = (
-                        input("\n¿Incrementar plazo de meses y mano de obra? (s/n)")
-                        .strip()
-                        .lower()
-                    )
-
-                    if opcionales == "s":
-                        obra.incrementar_plazo()
-                        obra.incrementar_mano_obra()
-                        break
-                    elif opcionales == "n":
-                        break
-
-                # Final o rescesion
-                while True:
-                    opcion_final = (
-                        input("\n¿Finalizar (F) o Rescindir (R) la obra? ").strip().lower()
-                    )
-
-                    if opcion_final == "f":
-                        obra.finalizar_obra()
-                        print("La obra ha sido FINALIZADA.")
-                        break
-                    elif opcion_final == "r":
-                        obra.rescindir_obra()
-                        print("La obra ha sido RESCINDIDA.")
-                        break
-                    else:
-                        print("Opción inválida, intente nuevamente.")
 
             case "3":
                 indicadores = GestionarObra.obtener_indicadores()
