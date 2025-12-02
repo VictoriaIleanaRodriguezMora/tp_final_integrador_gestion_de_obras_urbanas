@@ -1,5 +1,9 @@
+# Métodos utilitarios para obras
+
 from datetime import *
 from modelo_orm import Ubicacion
+from peewee import fn
+from modelo_orm import Contratacion
 
 
 # Pide al usuario un valor, valida que exista en la base, y devuelve el objeto Peewee correspondiente.
@@ -55,7 +59,6 @@ def utility_nueva_obra_multi(Model, campos):
             print(f"[ERROR] Validando datos: {e}")
             return None
 
-
 # Validador de enteros
 def pedir_int(texto):
     while True:
@@ -64,7 +67,6 @@ def pedir_int(texto):
             return int(valor)
         print("Debe ingresar un número entero válido.")
 
-
 # Validador de string no vacío
 def pedir_str(texto):
     while True:
@@ -72,7 +74,6 @@ def pedir_str(texto):
         if valor != "":
             return valor
         print("El valor no puede estar vacío.")
-
 
 # Validador de fecha DD/MM/YYYY
 def pedir_fecha(texto):
@@ -83,15 +84,7 @@ def pedir_fecha(texto):
         except ValueError:
             print("Formato incorrecto. Debe ser DD/MM/YYYY.")
 
-
-# utils/generar_nro_contratacion.py
-
-from datetime import datetime
-from peewee import fn
-from modelo_orm import Contratacion
-
-
-# Genera un número de contratación automático con el formato 'N/YYYY',     donde N es un contador incremental por año.
+# Genera un número de contratación automático con el formato 'N/YYYY', donde N es un contador incremental por año.
 def generar_nro_contratacion() -> str:
     # Ej: '1/2025' '2/2025'
     # El cálculo se basa en buscar la contratación más reciente del año actual.

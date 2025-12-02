@@ -96,12 +96,10 @@ class Obra(BaseModel):
     # métodos de instancia con el objetivo de definir las diferentes etapas de avance de obra
     # Los métodos de instancia necesitan una instancia de una clase y pueden acceder dicha instancia por medio de self
 
-    # Debe modificar la Etapa de la obra
-    # Debe modificar la Etapa de la obra
+    # Debe modificar la Etapa de la obra a "Proyecto"
     def nuevo_proyecto(self):
         print("\n[ETAPA] nuevo_proyecto iniciado.")
         try:
-
             # Cambia etapa a "Proyecto"
             etapa_proyecto, _ = Etapa.get_or_create(etapa="Proyecto")
             self.etapa_fk = etapa_proyecto
@@ -151,24 +149,25 @@ class Obra(BaseModel):
                 f"[ERROR] iniciar_contratacion - no se pudo asignar la etapa Proyecto.': {e}"
             )
 
-    # Debe pedir: nombre, cuit de la empresa que ajudicará una obra. Y número de expediente
+    # Debe pedir: nombre, cuit, número de expediente de la empresa que ajudicará una obra.
     def adjudicar_obra(self):
         expediente_original = self.expediente_numero
-
         print("\n[ETAPA] Adjudicar obra")
-
         try:
-
             # Pedir expediente
             user_expediente = input(
                 "Por seguridad, ingrese el número de expediente adjudicado: "
             ).strip()
+
+            # Inicio campo expediente
+            # Validar campo EXPEDIENTE vacío
             if not user_expediente:
                 print("[ERROR] El expediente no puede quedar vacío.")
                 return False
             print(
                 f"user_expediente {user_expediente}, expediente_original {expediente_original}"
             )
+
             while user_expediente != expediente_original:
                 print(
                     "[ERROR] El número de expediente ingresado no coincide con el registrado."
@@ -180,16 +179,33 @@ class Obra(BaseModel):
             print(
                 "[OPERACIÓN - EVALUACIÓN] ✅ Número de expediente coincide correctamente."
             )
+            # Fin campo expediente
 
-            empresa = input("Ingrese el nombre de la empresa adjudicataria: ").strip()
-            if not empresa:
-                print("[CAMPO INVÁLIDO] La empresa no puede quedar vacía.")
-                return False
+            # Inicio nombre empresa adjudicataria
+            cambiar_empresa = input(
+                "¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No"
+            ).upper()
+            if cambiar_empresa == "S":
+                user_empresa = input(
+                    "Ingrese el nombre de la empresa adjudicataria: "
+                ).strip()
+                if not user_empresa:
+                    print("[CAMPO INVÁLIDO] La empresa no puede quedar vacía.")
 
-            # Asignar empresa adjudicataria a la obra
-            self.licitacion_oferta_empresa = empresa
-            self.save()
-            print("[OPERACIÓN - SAVE] ✅ Empresa adjudicada correctamente.")
+                # Validar campo vacío
+                while not user_empresa:
+                    user_empresa = input(
+                        "🔄️ Porfavor ingrese un valor válido"
+                    ).strip()
+                # Si sale del bucle es porque ingresó un valor válido
+                self.licitacion_oferta_empresa = user_empresa
+                self.save()
+            else:
+                print("No se modifica el nombre de la empresa")
+            print(
+                f"[OPERACIÓN - SAVE] ✅ Empresa adjudicada '{user_empresa}' correctamente."
+            )
+            # Fin nombre empresa adjudicataria
 
             return True
 
@@ -199,13 +215,17 @@ class Obra(BaseModel):
     # Debe pedir: nueva fecha de inicio, nueva fecha de fin inicial
     def iniciar_obra(self):
         print("\n[ETAPA] Iniciar obra")
-
         try:
-            inicio = input("Fecha de inicio (DD/MM/YYYY): ").strip()
+            user_inicio = input("Fecha de inicio (DD/MM/YYYY): ").strip()
             fin = input("Fecha fin inicial (DD/MM/YYYY): ").strip()
 
             # Convertimos a datetime.date
-            fecha_inicio = datetime.strptime(inicio, "%d/%m/%Y").date()
+            fecha_inicio = datetime.strptime(user_inicio, "%d/%m/%Y").date()
+            while not fecha_inicio:
+                print("[CAMPO INVÁLIDO] Formato de fecha inválido")
+                user_inicio = input("Porfavor, ingrese una fecha válida (DD/MM/YYYY)")
+                fecha_inicio = datetime.strptime(user_inicio, "%d/%m/%Y").date()
+
             fecha_fin = datetime.strptime(fin, "%d/%m/%Y").date()
 
             self.fecha_inicio = fecha_inicio
@@ -215,8 +235,8 @@ class Obra(BaseModel):
             print("✔ Fechas actualizadas correctamente.")
             return True
 
-        except ValueError:
-            print("[ERROR] Formato de fecha inválido.")
+        except ValueError as e:
+            print("[ERROR] Formato de fecha inválido.", e)
             return False
 
     # Debe pedir: un número, el nuevo porcentaje a actualizar

@@ -472,18 +472,6 @@ class GestionarObra(ABC):
         return rtado
 
 
-# Creacion de estructura y carga de datos
-"""
-GestionarObra.extraer_datos()
-GestionarObra.limpiar_datos()
-GestionarObra.mapear_orm()
-GestionarObra.cargar_datos(GestionarObra.df_limpio)
-"""
-
-# Cargar una nueva obra
-# GestionarObra.nueva_obra()
-
-
 # Ver los campos únicos de cada tabla
 
 # GestionarObra.obtener_campos_unicos(Etapa, "etapa")
@@ -491,26 +479,6 @@ GestionarObra.cargar_datos(GestionarObra.df_limpio)
 # GestionarObra.obtener_campos_unicos(Ubicacion, "direccion")
 # GestionarObra.obtener_campos_unicos(Contratacion, "contratacion_tipo")
 # GestionarObra.obtener_campos_unicos(Obra, "monto_contrato")
-
-
-# Probar flujo
-
-# obra = Obra.get_by_id(1)
-# obra.nuevo_proyecto("Rescindida")
-# obra.iniciar_contratacion()
-# obra.adjudicar_obra("Empresa SA", "30-12345678-9")
-# obra.iniciar_obra(date(2025, 1, 3), date(2025, 12, 20))
-# obra.actualizar_porcentaje_avance(40)
-# obra.incrementar_plazo(2)
-# obra.finalizar_obra()
-
-# Menú
-print("🔵  Inicializando base de datos...")
-GestionarObra.conectar_db("Inicio")
-GestionarObra.extraer_datos()
-GestionarObra.mapear_orm()
-GestionarObra.limpiar_datos()  # Genera df_limpio interno
-GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
 
 if __name__ == "__main__":
     while True:

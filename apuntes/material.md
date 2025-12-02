@@ -2,6 +2,7 @@
 - https://www.w3sch
 - https://www.w3schools.com/python/python_datetime.asp
 - https://www.w3schools.com/python/ref_dictionary_items.asp
+- https://es.stackoverflow.com/questions/403268/python-validar-formato-fecha-dd-mm-yy
 
 ### Pewee
 - https://docs.peewee-orm.com/en/latest/
