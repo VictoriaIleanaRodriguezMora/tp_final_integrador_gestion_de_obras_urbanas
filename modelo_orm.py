@@ -5,7 +5,6 @@
 """
 
 from peewee import *
-import sqlite3
 from datetime import datetime, date
 
 import os
@@ -13,9 +12,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 # Creacion de la bdd vacía
 sqlite_db = SqliteDatabase(os.getenv("DB_NAME"))
-print(os.getenv("DB_NAME"))
+db_name = os.getenv("DB_NAME")
+print(db_name)
 
 
 # Este es nuetro modelo normalizado. Basado en pewee. El modelo son las tablas que tendrá la bdd
@@ -183,8 +184,9 @@ class Obra(BaseModel):
 
             # Inicio nombre empresa adjudicataria
             cambiar_empresa = input(
-                "¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No"
+                "¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No "
             ).upper()
+
             if cambiar_empresa == "S":
                 user_empresa = input(
                     "Ingrese el nombre de la empresa adjudicataria: "
@@ -194,21 +196,18 @@ class Obra(BaseModel):
 
                 # Validar campo vacío
                 while not user_empresa:
-                    user_empresa = input(
-                        "🔄️ Porfavor ingrese un valor válido"
-                    ).strip()
+                    user_empresa = input("🔄️ Porfavor ingrese un valor válido ").strip()
                 # Si sale del bucle es porque ingresó un valor válido
                 self.licitacion_oferta_empresa = user_empresa
                 self.save()
-            else:
+
+            if cambiar_empresa == "N":
                 print("No se modifica el nombre de la empresa")
+
             print(
-                f"[OPERACIÓN - SAVE] ✅ Empresa adjudicada '{user_empresa}' correctamente."
+                f"[OPERACIÓN - SAVE] ✅ Empresa adjudicada correctamente."
             )
             # Fin nombre empresa adjudicataria
-
-            return True
-
         except Exception as e:
             print(f"[ERROR] - no se pudo adjudicar la empresa': {e}")
 

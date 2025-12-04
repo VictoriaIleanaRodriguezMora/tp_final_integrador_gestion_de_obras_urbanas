@@ -10,20 +10,27 @@ PENDIENTE:
 🟡 Unificar mensaje de error
 Métodos de una obra existente
 🟡 Cuando ingresas un `tipo de contratacion` no existente, no te pide que ignreses uno válido. ⬅️ Y adjudica igualmente la obra.
+
 ✨ Más ambicioso y a futuro, permitirle un prompt para que diga si quiere ver los tipos de contratacion existentes, y mostrarselos.  
+
 ❌ (NO DEBE PEDIRLO) Al modificar datos de una obra existente, `el cuit`, debe existir en la bdd o puede ser uno nuevo?
+
 ✅ Encontrar la manera para permitir el menú, sin tener que correr la ejecución Creacion, limpieza, carga. Si ya estan cargados, llamar solo al menú
 ✅ Debe pedir el número de expediente? Sí, por seguridad
-🟡 Crear lógica y manejo, para que al correr el archivo gestionar_obras. el codigo sepa si ya se crearon las bdd o no. puede ser una consulta peewee o sqlite, o guardar el dato en un archivo, y consultarlo de ahí.
+✅ Crear lógica y manejo, para que al correr el archivo gestionar_obras. el codigo sepa si ya se crearon las bdd o no. puede ser una consulta peewee o sqlite, o guardar el dato en un archivo, y consultarlo de ahí.
 ✅ Si no se ingresa una empresa adjudicataria, dice [CAMPO INVÁLIDO] La empresa no puede quedar vacía. y no permite ingresar un dato denuevo
+
+🟡A futuro, ver de agregar mensajes particulares para el evento KeyboardInterrupt. Que no te permita cerrar en medio de un proceso de carga o actualizacion
+
 ❌ Si se ingresa fecha inválida: [ERROR] Formato de fecha inválido. . y no permite ingresar un dato denuevo
 [ERROR] Formato de fecha inválido. time data 'f' does not match format '%d/%m/%Y'
 ❌ Si se ingresa porcentaje no válido [ERROR] Debe ingresar un número entre 0 y 100. y no permite ingresar un dato denuevo
 ❌ (SI no quiero ninguna? que me deje no finalizar ni rescindir) ¿Finalizar (F) o Rescindir (R) la obra?
 🟡 Desea modificar el nombre de la empresa adjudicataria?
+
 --> Sí: Modificar y guardar
 --> No: Nada
-🟡 Limpiar y reacomodar las utilidades de utility_fechas.py
+✅ Limpiar y reacomodar las utilidades de utility_fechas.py
 
 ERRORES
 ✅Error al cargar_datos NOT NULL constraint failed: Etapa.etapa

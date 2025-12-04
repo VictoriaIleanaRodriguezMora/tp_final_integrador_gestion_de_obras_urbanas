@@ -59,7 +59,7 @@ def utility_nueva_obra_multi(Model, campos):
             print(f"[ERROR] Validando datos: {e}")
             return None
 
-# Validador de enteros
+# Validador de enteros. Se usa para pedir, monto contrato, mano de obra, etc
 def pedir_int(texto):
     while True:
         valor = input(texto).strip()
@@ -67,7 +67,7 @@ def pedir_int(texto):
             return int(valor)
         print("Debe ingresar un número entero válido.")
 
-# Validador de string no vacío
+# Validador de string no vacío. Se utiliza para pra pedir nombre empresa, etc
 def pedir_str(texto):
     while True:
         valor = input(texto).strip()
@@ -111,7 +111,7 @@ def generar_nro_contratacion() -> str:
 
     return f"{nuevo_num}/{anio_actual}"
 
-
+# Si la ubicación ingresada NO existe en la bdd, la crea. Si no, la reutiliza. 
 def obtener_o_crear_ubicacion():
     """
     Loop de ingreso de comuna, barrio y dirección.

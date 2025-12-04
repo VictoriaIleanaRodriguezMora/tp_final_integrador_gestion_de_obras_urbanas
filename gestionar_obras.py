@@ -1,29 +1,15 @@
 from abc import ABC
 import pandas as pd
 from peewee import *
-from modelo_orm import *
-import sqlite3
-from modelo_orm import sqlite_db
-from datetime import datetime, date
+from modelo_orm import sqlite_db, db_name, Obra, Etapa, AreaResponsable, TipoObra
+from datetime import *
+from utilities.utility_nueva_obra import *
 
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
 CVS_PATH = os.getenv("CVS_PATH")
-
-from datetime import *
-
-from utilities.utility_nueva_obra import (
-    utility_nueva_obra,
-    utility_nueva_obra_multi,
-    pedir_str,
-    pedir_int,
-    pedir_fecha,
-    generar_nro_contratacion,
-    obtener_o_crear_ubicacion,
-)
-
+load_dotenv()
 
 class GestionarObra(ABC):
     df_limpio = []
@@ -471,138 +457,147 @@ class GestionarObra(ABC):
         print(rtado)
         return rtado
 
-
 # Ver los campos únicos de cada tabla
-
 # GestionarObra.obtener_campos_unicos(Etapa, "etapa")
 # GestionarObra.obtener_campos_unicos(AreaResponsable, "area_responsable")
 # GestionarObra.obtener_campos_unicos(Ubicacion, "direccion")
 # GestionarObra.obtener_campos_unicos(Contratacion, "contratacion_tipo")
 # GestionarObra.obtener_campos_unicos(Obra, "monto_contrato")
 
-if __name__ == "__main__":
-    while True:
-        print("\n===== Observatorio de Obras Urbanas =====")
-        print("1. Crear nueva obra")
-        print("2. Avanzar etapas de una obra existente")
-        print("3. Mostrar indicadores")
-        print("4. Ver los valores únicos de una tabla")
-        print("5. Salir")
-        opcion = input("Seleccione una opción: ").strip()
+# Carga de datos
+if os.path.exists(db_name):
+    print("🌻 La base de datos ya existe. Elija una de las siguientes opciones ⬇️")    
+    # 📄Menú
+    if __name__ == "__main__":
+        while True:
+            print("\n===== 🔬 Observatorio de Obras Urbanas ⚙️  =====")
+            print("1. Crear nueva obra")
+            print("2. Avanzar etapas de una obra existente")
+            print("3. Mostrar indicadores")
+            print("4. Ver los valores únicos de una tabla")
+            print("5. Salir")
+            opcion = input("Seleccione una opción: ").strip()
 
-        match opcion:
-            case "1":
-                cantidad_obras = 0
-                while True:
-                    obra = GestionarObra.nueva_obra()
-
-                    if obra:
-                        cantidad_obras += 1
-                        print(f"Obra '{obra.nombre}' creada correctamente.")
-
-                    if cantidad_obras >= 2:
-                        salir = input("¿Desea cargar otra obra? (s/n): ").lower()
-                        if salir == "n":
-                            break
-                    else:
-                        print("Debe cargar al menos 2 obras antes de salir.")
-
-            case "2":
-                try:
-                    obra_id = int(input("\nIngrese el ID de la obra: "))
-                    obra = Obra.get_by_id(obra_id)
-                    # Etapa 1
-                    obra.nuevo_proyecto()
-
-                    # Etapa 2
-                    obra.iniciar_contratacion()
-
-                    # Etapa 3
-                    obra.adjudicar_obra()
-
-                    # Etapa 4
-                    obra.iniciar_obra()
-
-                    # Etapa 5
-                    obra.actualizar_porcentaje_avance()
-
-                    # Opcionales
+            match opcion:
+                case "1":
+                    cantidad_obras = 0
                     while True:
-                        opcionales = (
-                            input("\n¿Incrementar plazo de meses y mano de obra? (s/n)")
-                            .strip()
-                            .lower()
-                        )
+                        obra = GestionarObra.nueva_obra()
 
-                        if opcionales == "s":
-                            obra.incrementar_plazo()
-                            obra.incrementar_mano_obra()
-                            break
-                        elif opcionales == "n":
-                            break
+                        if obra:
+                            cantidad_obras += 1
+                            print(f"Obra '{obra.nombre}' creada correctamente.")
 
-                    # Final o rescesion
-                    while True:
-                        opcion_final = (
-                            input("\n¿Finalizar (F) o Rescindir (R) la obra? ")
-                            .strip()
-                            .lower()
-                        )
-
-                        if opcion_final == "f":
-                            obra.finalizar_obra()
-                            print("La obra ha sido FINALIZADA.")
-                            break
-                        elif opcion_final == "r":
-                            obra.rescindir_obra()
-                            print("La obra ha sido RESCINDIDA.")
-                            break
+                        if cantidad_obras >= 2:
+                            salir = input("¿Desea cargar otra obra? (s/n): ").lower()
+                            if salir == "n":
+                                break
                         else:
-                            print("Opción inválida, intente nuevamente.")
+                            print("Debe cargar al menos 2 obras antes de salir.")
 
-                except Exception as e:
-                    print("[ERROR] - Opción 2", e)
-                    continue
+                case "2":
+                    try:
+                        obra_id = int(input("\nIngrese el ID de la obra: "))
+                        obra = Obra.get_by_id(obra_id)
+                        # Etapa 1
+                        obra.nuevo_proyecto()
 
-                print(f"\nAvanzando etapas para la obra: {obra.nombre}")
+                        # Etapa 2
+                        obra.iniciar_contratacion()
 
-            case "3":
-                indicadores = GestionarObra.obtener_indicadores()
+                        # Etapa 3
+                        obra.adjudicar_obra()
 
-                print("\n📊 ===== INDICADORES =====\n")
+                        # Etapa 4
+                        obra.iniciar_obra()
 
-                for key, value in indicadores.items():
-                    print(f"🔹 {key.upper()}:")
-                    print(f"   {value}\n")
+                        # Etapa 5
+                        obra.actualizar_porcentaje_avance()
 
-            case "4":
-                print("\nModelos disponibles:")
-                print("Etapa, AreaResponsable, Ubicacion, Contratacion, TipoObra, Obra")
+                        # Opcionales
+                        while True:
+                            opcionales = (
+                                input("\n¿Incrementar plazo de meses y mano de obra? (s/n)")
+                                .strip()
+                                .lower()
+                            )
 
-                modelo_nombre = input("Ingrese el nombre del modelo: ").strip()
-                columna = input("Ingrese el nombre de la columna: ").strip()
+                            if opcionales == "s":
+                                obra.incrementar_plazo()
+                                obra.incrementar_mano_obra()
+                                break
+                            elif opcionales == "n":
+                                break
 
-                modelos = {
-                    "Etapa": Etapa,
-                    "AreaResponsable": AreaResponsable,
-                    "Ubicacion": Ubicacion,
-                    "Contratacion": Contratacion,
-                    "TipoObra": TipoObra,
-                    "Obra": Obra,
-                }
+                        # Final o rescesion
+                        while True:
+                            opcion_final = (
+                                input("\n¿Finalizar (F) o Rescindir (R) la obra? ")
+                                .strip()
+                                .lower()
+                            )
 
-                if modelo_nombre in modelos:
-                    GestionarObra.obtener_campos_unicos(
-                        modelo=modelos[modelo_nombre], columna=columna
-                    )
-                else:
-                    print("Modelo inválido.")
+                            if opcion_final == "f":
+                                obra.finalizar_obra()
+                                print("La obra ha sido FINALIZADA.")
+                                break
+                            elif opcion_final == "r":
+                                obra.rescindir_obra()
+                                print("La obra ha sido RESCINDIDA.")
+                                break
+                            else:
+                                print("Opción inválida, intente nuevamente.")
 
-            case "5":
-                print("Cerrando sistema...")
-                if not sqlite_db.is_closed():
-                    sqlite_db.close()
-                break
+                    except Exception as e:
+                        print("[ERROR] - Opción 2", e)
+                        continue
 
-            case _:
-                print("Opción inválida. Intente nuevamente.")
+                    print(f"\nAvanzando etapas para la obra: {obra.nombre}")
+
+                case "3":
+                    indicadores = GestionarObra.obtener_indicadores()
+
+                    print("\n📊 ===== INDICADORES =====\n")
+
+                    for key, value in indicadores.items():
+                        print(f"🔹 {key.upper()}:")
+                        print(f"   {value}\n")
+
+                case "4":
+                    print("\nModelos disponibles:")
+                    print("Etapa, AreaResponsable, Ubicacion, Contratacion, TipoObra, Obra")
+
+                    modelo_nombre = input("Ingrese el nombre del modelo: ").strip()
+                    columna = input("Ingrese el nombre de la columna: ").strip()
+
+                    modelos = {
+                        "Etapa": Etapa,
+                        "AreaResponsable": AreaResponsable,
+                        "Ubicacion": Ubicacion,
+                        "Contratacion": Contratacion,
+                        "TipoObra": TipoObra,
+                        "Obra": Obra,
+                    }
+
+                    if modelo_nombre in modelos:
+                        GestionarObra.obtener_campos_unicos(
+                            modelo=modelos[modelo_nombre], columna=columna
+                        )
+                    else:
+                        print("Modelo inválido.")
+
+                case "5":
+                    print("Cerrando sistema...")
+                    if not sqlite_db.is_closed():
+                        sqlite_db.close()
+                    break
+
+                case _:
+                    print("Opción inválida. Intente nuevamente.")
+else: 
+    print("🔵 Inicializando base de datos...")
+    GestionarObra.conectar_db("Inicio")
+    GestionarObra.extraer_datos()
+    GestionarObra.mapear_orm()
+    GestionarObra.limpiar_datos() # Genera df_limpio interno
+    GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
