@@ -490,8 +490,17 @@ def main():
         GestionarObra.mapear_orm()
         GestionarObra.limpiar_datos()  # Genera df_limpio interno
         GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
-        menu_opciones()
 
+
+        menu_opciones(
+            GestionarObra,
+            Obra,
+            AreaResponsable,
+            Contratacion,
+            Etapa,
+            TipoObra,
+            Ubicacion,
+        )
 
 try:
     main()
