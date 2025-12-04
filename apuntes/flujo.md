@@ -19,7 +19,7 @@ Métodos de una obra existente
 ✅ Debe pedir el número de expediente? Sí, por seguridad
 ✅ Crear lógica y manejo, para que al correr el archivo gestionar_obras. el codigo sepa si ya se crearon las bdd o no. puede ser una consulta peewee o sqlite, o guardar el dato en un archivo, y consultarlo de ahí.
 ✅ Si no se ingresa una empresa adjudicataria, dice [CAMPO INVÁLIDO] La empresa no puede quedar vacía. y no permite ingresar un dato denuevo
-
+✅ Se controla globalmente el keyboard interrumpt
 🟡A futuro, ver de agregar mensajes particulares para el evento KeyboardInterrupt. Que no te permita cerrar en medio de un proceso de carga o actualizacion
 
 ❌ Si se ingresa fecha inválida: [ERROR] Formato de fecha inválido. . y no permite ingresar un dato denuevo

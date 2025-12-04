@@ -3,6 +3,10 @@
 - https://www.w3schools.com/python/python_datetime.asp
 - https://www.w3schools.com/python/ref_dictionary_items.asp
 - https://es.stackoverflow.com/questions/403268/python-validar-formato-fecha-dd-mm-yy
+- https://www.geeksforgeeks.org/python/how-to-catch-a-keyboardinterrupt-in-python/
+- https://es.stackoverflow.com/questions/111029/capturar-keyboardinterrupt
+- https://stackoverflow.com/questions/21120947/catching-keyboardinterrupt-in-python-during-program-shutdown
+- https://es.stackoverflow.com/questions/531352/como-realizar-una-funci%C3%B3n-con-un-argumento-optativo-y-que-me-devuelva-los-objeto
 
 ### Pewee
 - https://docs.peewee-orm.com/en/latest/
