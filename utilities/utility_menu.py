@@ -1,5 +1,5 @@
 def menu_opciones(
-    GestionarObra, Obra, AreaResponsable, Contratacion, Etapa, TipoObra, Ubicacion
+    GestionarObra, Obra, AreaResponsable, Contratacion, Etapa, TipoObra, Ubicacion, sqlite_db
 ):
     while True:
         print("\n===== 🔬 Observatorio de Obras Urbanas ⚙️  =====")

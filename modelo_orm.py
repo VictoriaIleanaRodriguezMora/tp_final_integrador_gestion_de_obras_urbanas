@@ -10,6 +10,8 @@ from datetime import datetime, date
 import os
 from dotenv import load_dotenv
 
+from utilities.utility_fechas import pedir_fecha
+
 load_dotenv()
 
 
@@ -204,9 +206,7 @@ class Obra(BaseModel):
             if cambiar_empresa == "N":
                 print("No se modifica el nombre de la empresa")
 
-            print(
-                f"[OPERACIÓN - SAVE] ✅ Empresa adjudicada correctamente."
-            )
+            print(f"[OPERACIÓN - SAVE] ✅ Empresa adjudicada correctamente.")
             # Fin nombre empresa adjudicataria
         except Exception as e:
             print(f"[ERROR] - no se pudo adjudicar la empresa': {e}")
@@ -215,20 +215,12 @@ class Obra(BaseModel):
     def iniciar_obra(self):
         print("\n[ETAPA] Iniciar obra")
         try:
-            user_inicio = input("Fecha de inicio (DD/MM/YYYY): ").strip()
-            fin = input("Fecha fin inicial (DD/MM/YYYY): ").strip()
 
-            # Convertimos a datetime.date
-            fecha_inicio = datetime.strptime(user_inicio, "%d/%m/%Y").date()
-            while not fecha_inicio:
-                print("[CAMPO INVÁLIDO] Formato de fecha inválido")
-                user_inicio = input("Porfavor, ingrese una fecha válida (DD/MM/YYYY)")
-                fecha_inicio = datetime.strptime(user_inicio, "%d/%m/%Y").date()
+            user_fecha_inicio = pedir_fecha("Fecha de inicio (DD/MM/YYYY): ")
+            user_fecha_fin = pedir_fecha("Fecha fin inicial (DD/MM/YYYY): ")
 
-            fecha_fin = datetime.strptime(fin, "%d/%m/%Y").date()
-
-            self.fecha_inicio = fecha_inicio
-            self.fecha_fin_inicial = fecha_fin
+            self.fecha_inicio = user_fecha_inicio
+            self.fecha_fin_inicial = user_fecha_fin
             self.save()
 
             print("✔ Fechas actualizadas correctamente.")

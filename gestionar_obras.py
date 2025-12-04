@@ -1,10 +1,22 @@
 from abc import ABC
 import pandas as pd
 from peewee import *
-from modelo_orm import sqlite_db, db_name, Obra, Etapa, AreaResponsable, TipoObra
+from modelo_orm import (
+    sqlite_db,
+    db_name,
+    Obra,
+    Etapa,
+    AreaResponsable,
+    TipoObra,
+    Ubicacion,
+    Contratacion,
+)
 from datetime import *
+# 🔴 La funcion pedir_fecha se modificó
+from utilities.utility_fechas import pedir_fecha
 from utilities.utility_nueva_obra import *
-from utilities.utlity_menu import menu_opciones
+from utilities.utility_ubicacion_contratacion import generar_nro_contratacion, obtener_o_crear_ubicacion
+from utilities.utility_menu import menu_opciones
 import os
 from dotenv import load_dotenv
 
@@ -482,6 +494,7 @@ def main():
             Etapa,
             TipoObra,
             Ubicacion,
+            sqlite_db,
         )
     else:
         print("🔵 Inicializando base de datos...")
@@ -491,7 +504,6 @@ def main():
         GestionarObra.limpiar_datos()  # Genera df_limpio interno
         GestionarObra.cargar_datos(df_limpio=GestionarObra.df_limpio)
 
-
         menu_opciones(
             GestionarObra,
             Obra,
@@ -500,7 +512,9 @@ def main():
             Etapa,
             TipoObra,
             Ubicacion,
+            sqlite_db,
         )
+
 
 try:
     main()
