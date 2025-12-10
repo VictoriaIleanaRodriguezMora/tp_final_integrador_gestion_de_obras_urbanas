@@ -2,7 +2,13 @@
 - https://www.w3sch
 - https://www.w3schools.com/python/python_datetime.asp
 - https://www.w3schools.com/python/ref_dictionary_items.asp
-
+- https://es.stackoverflow.com/questions/403268/python-validar-formato-fecha-dd-mm-yy
+- https://www.geeksforgeeks.org/python/how-to-catch-a-keyboardinterrupt-in-python/
+- https://es.stackoverflow.com/questions/111029/capturar-keyboardinterrupt
+- https://stackoverflow.com/questions/21120947/catching-keyboardinterrupt-in-python-during-program-shutdown
+- https://es.stackoverflow.com/questions/531352/como-realizar-una-funci%C3%B3n-con-un-argumento-optativo-y-que-me-devuelva-los-objeto
+- https://es.stackoverflow.com/questions/233127/verificar-que-una-variable-es-de-tipo-int-y-float
+- 
 ### Pewee
 - https://docs.peewee-orm.com/en/latest/
 - https://foro.recursospython.com/Thread-peewee-IntegrityError-NOT-NULL-constraint-failed-person-name?pid=1391
@@ -21,6 +27,7 @@ Querying
 - https://www.geeksforgeeks.org/python/python-pandas-series-str-strip-lstrip-and-rstrip/
 - https://www.geeksforgeeks.org/python/capitalize-first-letter-of-a-column-in-pandas-dataframe/
 - https://www.geeksforgeeks.org/pandas/pandas-dataframe-iterrows/
+- https://www.geeksforgeeks.org/python/check-if-value-is-int-or-float-in-python/
 - 
 ### SQLite
 - 
@@ -42,43 +49,3 @@ Querying
 ### Variables de entorno
 - https://dev.to/asjordi/como-utilizar-variables-de-entorno-en-python-4pk0
 
-### Instalaciones
-## Instalar pip
-
-https://pip.pypa.io/en/stable/installation/
-https://www.geeksforgeeks.org/installation-guide/how-to-install-pip-on-windows/
-1) Descargar PIP
-- https://bootstrap.pypa.io/get-pip.py -> guárdalo en el mismo directorio donde está instalado Python
-2) Para saber donde tengo instalado python
-```bash
-where python
-```
-3) Cambie la ruta actual del directorio en la línea de comandos a la ruta del directorio donde se encuentra el archivo mencionado anteriormente.
-4) Ejecutar el comando para instalar Python
-```bash
-python get-pip.py
-```
-4) Ejecutar el comando para ver donde se instaló Pip
-```bash
-where pip
-```
-5) Agregar esa ruta de PIP a las variables de entorno de Windows. 
-- Variables de entorno > Click en boton 'Variables de entorno' > Doble click en donde dice 'PATH' > Click en 'Nuevo' > Pegar la ruta de pip
-- 
-## Instalar pewee
-https://docs.peewee-orm.com/en/latest/peewee/installation.html
-https://pypi.org/project/peewee/
-https://www.geeksforgeeks.org/installation-guide/how-to-install-peewee-python-library-on-windows
-```bash
-pip install peewee
-```
-
-## Alternativa
-```bash
-python -m pip install peewee
-```
-
-## Instalar dotenv
-```bash
-pip install python-dotenv
-```
