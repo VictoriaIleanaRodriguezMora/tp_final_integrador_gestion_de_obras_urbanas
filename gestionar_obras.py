@@ -519,7 +519,7 @@ def main():
 try:
     main()
 except KeyboardInterrupt:
-    print("[EJECUCIÓN INTERRUMPIDA]")
+    print("\n[EJECUCIÓN INTERRUMPIDA]")
     print("🟨 Usd a presionado CTRL + C y ha interrumpido la ejecución de programa")
 except Exception as e:
     print(e)

@@ -7,7 +7,8 @@
 - https://es.stackoverflow.com/questions/111029/capturar-keyboardinterrupt
 - https://stackoverflow.com/questions/21120947/catching-keyboardinterrupt-in-python-during-program-shutdown
 - https://es.stackoverflow.com/questions/531352/como-realizar-una-funci%C3%B3n-con-un-argumento-optativo-y-que-me-devuelva-los-objeto
-
+- https://es.stackoverflow.com/questions/233127/verificar-que-una-variable-es-de-tipo-int-y-float
+- 
 ### Pewee
 - https://docs.peewee-orm.com/en/latest/
 - https://foro.recursospython.com/Thread-peewee-IntegrityError-NOT-NULL-constraint-failed-person-name?pid=1391
@@ -26,6 +27,7 @@ Querying
 - https://www.geeksforgeeks.org/python/python-pandas-series-str-strip-lstrip-and-rstrip/
 - https://www.geeksforgeeks.org/python/capitalize-first-letter-of-a-column-in-pandas-dataframe/
 - https://www.geeksforgeeks.org/pandas/pandas-dataframe-iterrows/
+- https://www.geeksforgeeks.org/python/check-if-value-is-int-or-float-in-python/
 - 
 ### SQLite
 - 

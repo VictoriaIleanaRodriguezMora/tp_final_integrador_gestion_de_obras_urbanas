@@ -26,10 +26,13 @@ Métodos de una obra existente
 [ERROR] Formato de fecha inválido. time data 'f' does not match format '%d/%m/%Y'
 ❌ Si se ingresa porcentaje no válido [ERROR] Debe ingresar un número entre 0 y 100. y no permite ingresar un dato denuevo
 ❌ (SI no quiero ninguna? que me deje no finalizar ni rescindir) ¿Finalizar (F) o Rescindir (R) la obra?
-🟡 Desea modificar el nombre de la empresa adjudicataria?
-
+✅ Desea modificar el nombre de la empresa adjudicataria?
 --> Sí: Modificar y guardar
 --> No: Nada
+🟡 ¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No h ----> se le pone una opcion que no es y no dice
+No se modifica el nombre de la empresa
+o no te pide que ingreses S o N
+🟡 Si en fecha inicio se pone 34 o en mes, 13 no lo toma, mejorar el mensaje de error
 ✅ Limpiar y reacomodar las utilidades de utility_fechas.py
 
 ERRORES

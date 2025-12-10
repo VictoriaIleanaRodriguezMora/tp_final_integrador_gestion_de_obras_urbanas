@@ -1,6 +1,6 @@
 from datetime import datetime
 
-def pedir_fecha(texto=""):
+def  pedir_fecha(texto=""):
     print("[METODO UTILITARIO] - pedir_fecha")
     while True:
         # Sí no es un valor válido, entra al except, hasta que lo sea.

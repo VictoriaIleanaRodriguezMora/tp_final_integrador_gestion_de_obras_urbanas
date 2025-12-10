@@ -11,6 +11,7 @@ import os
 from dotenv import load_dotenv
 
 from utilities.utility_fechas import pedir_fecha
+from utilities.utility_porcentaje import pedir_porcentaje
 
 load_dotenv()
 
@@ -167,9 +168,6 @@ class Obra(BaseModel):
             if not user_expediente:
                 print("[ERROR] El expediente no puede quedar vacío.")
                 return False
-            print(
-                f"user_expediente {user_expediente}, expediente_original {expediente_original}"
-            )
 
             while user_expediente != expediente_original:
                 print(
@@ -235,19 +233,14 @@ class Obra(BaseModel):
         print("\n[ETAPA] Actualizar porcentaje de avance")
 
         try:
-            nuevo = int(input("Ingrese nuevo porcentaje (0 a 100): ").strip())
-            if not 0 <= nuevo <= 100:
-                raise ValueError()
-
-            self.porcentaje_avance = nuevo
+            porcentaje = pedir_porcentaje(self)
+            while not porcentaje:
+                porcentaje = pedir_porcentaje(self)
+            self.porcentaje_avance = porcentaje
             self.save()
-
             print("✔ Porcentaje actualizado.")
-            return True
-
         except ValueError:
             print("[ERROR] Debe ingresar un número entre 0 y 100.")
-            return False
 
     # Al invocar este método, el porcentaje de avance pasa a 100. Y la etapa = 'Finalizada'
     def finalizar_obra(self):
