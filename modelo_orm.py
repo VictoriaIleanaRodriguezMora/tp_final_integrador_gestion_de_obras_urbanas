@@ -229,13 +229,12 @@ class Obra(BaseModel):
             return False
 
     # Debe pedir: un número, el nuevo porcentaje a actualizar
+    # Debe pedir: un número, el nuevo porcentaje a actualizar
     def actualizar_porcentaje_avance(self):
         print("\n[ETAPA] Actualizar porcentaje de avance")
 
         try:
             porcentaje = pedir_porcentaje(self)
-            while not porcentaje:
-                porcentaje = pedir_porcentaje(self)
             self.porcentaje_avance = porcentaje
             self.save()
             print("✔ Porcentaje actualizado.")

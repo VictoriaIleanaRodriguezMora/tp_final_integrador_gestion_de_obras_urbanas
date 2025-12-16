@@ -8,7 +8,8 @@
 - https://stackoverflow.com/questions/21120947/catching-keyboardinterrupt-in-python-during-program-shutdown
 - https://es.stackoverflow.com/questions/531352/como-realizar-una-funci%C3%B3n-con-un-argumento-optativo-y-que-me-devuelva-los-objeto
 - https://es.stackoverflow.com/questions/233127/verificar-que-una-variable-es-de-tipo-int-y-float
-- 
+- https://ellibrodepython.com/switch-python
+
 ### Pewee
 - https://docs.peewee-orm.com/en/latest/
 - https://foro.recursospython.com/Thread-peewee-IntegrityError-NOT-NULL-constraint-failed-person-name?pid=1391
