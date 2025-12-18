@@ -11,12 +11,10 @@
 - Unificar mensaje de error
   Métodos de una obra existente
 - Cuando ingresas un `tipo de contratacion` no existente, no te pide que ignreses uno válido. ⬅️ Y adjudica igualmente la obra.
-- ¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No h ----> se le pone una opcion que no es y no dice
-  No se modifica el nombre de la empresa
-  o no te pide que ingreses S o N
+
 - Si en fecha inicio se pone 34 o en mes, 13 no lo toma, mejorar el mensaje de error
 
-## ERRORES DETECTADOS
+## ❌ ERRORES DETECTADOS
 
 - (NO DEBE PEDIRLO) Al modificar datos de una obra existente, `el cuit`, debe existir en la bdd o puede ser uno nuevo?
 
@@ -52,28 +50,32 @@
   --> Sí: Modificar y guardar
   --> No: Nada
 - Limpiar y reacomodar las utilidades de utility_fechas.py
-  | Campo | Valor |
+- ¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No h ----> se le pone una opcion que no es y no dice
+  No se modifica el nombre de la empresa
+  o no te pide que ingreses S o N
+
+  | Campo                  | Valor                                                                        |
   | ---------------------- | ---------------------------------------------------------------------------- |
-  | Entorno | Plan 54 escuelas |
-  | Nombre | Escuela de Educación Primaria N.° 24 D.E. 15 "Francisco Morazán" - Siglo XXI |
-  | Etapa | Finalizada |
-  | Tipo de obra | Escuelas |
-  | Área responsable | Ministerio de Educación |
-  | Descripción | Primaria |
-  | Monto del contrato | $67.065.700,00 |
-  | Comuna | 12 |
-  | Barrio | Villa Urquiza |
-  | Dirección | RIVERA, PEDRO I., DR. 4221 |
-  | Fecha de inicio | 1/12/2013 |
-  | Fecha de finalización | 31/5/2016 |
-  | Plazo en meses | 29 |
-  | Porcentaje de avance | 100 |
-  | Empresa | Criba S.A. |
-  | Año de licitación | 2013 |
-  | Tipo de contratación | Licitación Pública |
-  | Número de contratación | 2030-MDUGC-2013 |
-  | CUIT contratista | 30505454436 |
-  | Mano de obra | 0 |
-  | Obra destacada | SI |
-  | Número de expediente | 914412-MDUGC-2013 |
-  | Financiamiento | Desconocido |
+  | Entorno                | Plan 54 escuelas                                                             |
+  | Nombre                 | Escuela de Educación Primaria N.° 24 D.E. 15 "Francisco Morazán" - Siglo XXI |
+  | Etapa                  | Finalizada                                                                   |
+  | Tipo de obra           | Escuelas                                                                     |
+  | Área responsable       | Ministerio de Educación                                                      |
+  | Descripción            | Primaria                                                                     |
+  | Monto del contrato     | $67.065.700,00                                                               |
+  | Comuna                 | 12                                                                           |
+  | Barrio                 | Villa Urquiza                                                                |
+  | Dirección              | RIVERA, PEDRO I., DR. 4221                                                   |
+  | Fecha de inicio        | 1/12/2013                                                                    |
+  | Fecha de finalización  | 31/5/2016                                                                    |
+  | Plazo en meses         | 29                                                                           |
+  | Porcentaje de avance   | 100                                                                          |
+  | Empresa                | Criba S.A.                                                                   |
+  | Año de licitación      | 2013                                                                         |
+  | Tipo de contratación   | Licitación Pública                                                           |
+  | Número de contratación | 2030-MDUGC-2013                                                              |
+  | CUIT contratista       | 30505454436                                                                  |
+  | Mano de obra           | 0                                                                            |
+  | Obra destacada         | SI                                                                           |
+  | Número de expediente   | 914412-MDUGC-2013                                                            |
+  | Financiamiento         | Desconocido                                                                  |

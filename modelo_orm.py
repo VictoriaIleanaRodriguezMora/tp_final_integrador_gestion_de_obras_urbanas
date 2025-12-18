@@ -183,9 +183,15 @@ class Obra(BaseModel):
             # Fin campo expediente
 
             # Inicio nombre empresa adjudicataria
-            cambiar_empresa = input(
-                "¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No "
-            ).upper()
+            cambiar_empresa = (
+                input("¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No ")
+                .upper()
+                .strip()
+            )
+            while not cambiar_empresa:
+                cambiar_empresa = input(
+                    "🔄️ Usd ingresó un valor inválido. Intente nuevamente \n ¿Desea cambiar la empresa adjudicataria? (S) Sí, (N) No "
+                )
 
             if cambiar_empresa == "S":
                 user_empresa = input(
