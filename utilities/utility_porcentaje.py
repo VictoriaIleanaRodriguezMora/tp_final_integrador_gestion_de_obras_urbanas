@@ -14,4 +14,3 @@ def pedir_porcentaje(self):
             print(
                 "🔄️ Usd ignresó un valor inválido, porfavor ingrese un número entre 0 y 100."
             )
-            return False
